@@ -1,6 +1,6 @@
 module API
     module V1
-      class  Transaction_logs < Grape::API
+      class  TransactionLogs < Grape::API
         resource :transaction_logs do
 
           desc '交易日志'

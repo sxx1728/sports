@@ -14,6 +14,7 @@ module API
 
       default_format :json
 
+      mount API::V1::Captchas
       mount API::V1::Registrators
       mount API::V1::Appeals
       mount API::V1::Arbitraments
@@ -22,7 +23,7 @@ module API
       mount API::V1::Replies
       mount API::V1::Sessions
       mount API::V1::Settlements
-      mount API::V1::Transaction_logs
+      mount API::V1::TransactionLogs
       mount API::V1::Transactions
 
       namespace :doc do

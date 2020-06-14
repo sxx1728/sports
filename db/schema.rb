@@ -10,9 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_04_30_160745) do
+ActiveRecord::Schema.define(version: 2020_06_13_120738) do
 
-  create_table "admins", force: :cascade do |t|
+  create_table "admins", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci", force: :cascade do |t|
     t.string "email", limit: 128, default: "", null: false
     t.string "encrypted_password", limit: 128, default: "", null: false
     t.string "reset_password_token", limit: 128
@@ -40,26 +40,26 @@ ActiveRecord::Schema.define(version: 2020_04_30_160745) do
     t.index ["unlock_token"], name: "index_admins_on_unlock_token", unique: true
   end
 
-  create_table "admins_roles", id: false, force: :cascade do |t|
-    t.integer "admin_id"
-    t.integer "role_id"
+  create_table "admins_roles", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci", force: :cascade do |t|
+    t.bigint "admin_id"
+    t.bigint "role_id"
     t.index ["admin_id", "role_id"], name: "index_admins_roles_on_admin_id_and_role_id"
     t.index ["admin_id"], name: "index_admins_roles_on_admin_id"
     t.index ["role_id"], name: "index_admins_roles_on_role_id"
   end
 
-  create_table "coins", force: :cascade do |t|
-    t.string "name", limit: 32, default: "", null: false
-    t.string "addr", limit: 512, default: "", null: false
-    t.integer "decimals", default: 18, null: false
+  create_table "captchas", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci", force: :cascade do |t|
+    t.string "phone", limit: 16
+    t.string "captcha", limit: 8
+    t.datetime "expire_at"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
 
-  create_table "roles", force: :cascade do |t|
+  create_table "roles", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci", force: :cascade do |t|
     t.string "name", limit: 32
     t.string "resource_type"
-    t.integer "resource_id"
+    t.bigint "resource_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["name", "resource_type", "resource_id"], name: "index_roles_on_name_and_resource_type_and_resource_id"
@@ -67,22 +67,15 @@ ActiveRecord::Schema.define(version: 2020_04_30_160745) do
     t.index ["resource_type", "resource_id"], name: "index_roles_on_resource_type_and_resource_id"
   end
 
-  create_table "rooms", force: :cascade do |t|
-    t.integer "no", default: 0, null: false
-    t.string "price_addr", limit: 512, default: "", null: false
-    t.string "join_coin_addr", limit: 512, default: "", null: false
-    t.integer "time_level", default: 0, null: false
-    t.bigint "invent_level", default: 0, null: false
-    t.integer "player_number", default: 0, null: false
-    t.integer "winer_number", default: 0, null: false
-    t.boolean "is_deleted", default: false, null: false
-    t.integer "rate", default: 0, null: false
-    t.integer "cur_round", default: 0, null: false
-    t.datetime "begin_at", null: false
+  create_table "users", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci", force: :cascade do |t|
+    t.string "phone", limit: 16
+    t.string "type", limit: 16
+    t.string "status", limit: 16
+    t.string "nick_name", limit: 32
+    t.string "password_md5", limit: 32
+    t.string "eth_wallet_address", limit: 64
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.datetime "next_round_at"
-    t.integer "interval_minute"
   end
 
 end

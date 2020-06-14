@@ -9,7 +9,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
 
-  <title>Game管理系统</title>
+  <title>链租管理系统</title>
 
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
@@ -88,7 +88,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!-- Brand Logo -->
     <a href="index3.html" class="brand-link">
       <%= image_pack_tag("logo.png", class: "brand-image img-circle elevation-3", style: "opacity: .8")%>
-      <span class="brand-text font-weight-light">游戏</span>
+      <span class="brand-text font-weight-light">链租管理</span>
     </a>
 
     <!-- Sidebar -->
@@ -112,41 +112,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
                with font-awesome or any other icon font library -->
 
             <li class="nav-item">
-              <a href="<%=rooms_path(func: 'rooms')%>" class="nav-link <%= "active" if 'rooms' == session['func'] %>">
+              <a href="<%=users_path(func: 'users')%>" class="nav-link <%= "active" if 'users' == session['func'] %>">
                 <i class="nav-icon fas fa-coins"></i>
                 <p>
-                  房间列表
+                  用户列表
                 </p>
               </a>
             </li>
 
-             <li class="nav-item">
-              <a href="<%=new_room_path(func: 'new_room')%>" class="nav-link <%= "active" if 'new_room' == session['func'] %>">
-                <i class="far fa-plus-square nav-icon"></i>
-                <p>
-                  添加房间
-                </p>
-              </a>
-            </li>
- 
-            <li class="nav-item">
-              <a href="<%=coins_path(func: 'coins')%>" class="nav-link <%= "active" if 'coins' == session['func'] %>">
-                <i class="nav-icon fas fa-coins"></i>
-                <p>
-                  币种列表
-                </p>
-              </a>
-            </li>
-
-             <li class="nav-item">
-              <a href="<%=new_coin_path(func: 'new_coin')%>" class="nav-link <%= "active" if 'new_coin' == session['func'] %>">
-                <i class="far fa-plus-square nav-icon"></i>
-                <p>
-                  添加币种
-                </p>
-              </a>
-            </li>
- 
 
           <% if current_admin.has_role? 'admin' %>
             <li class="nav-item">

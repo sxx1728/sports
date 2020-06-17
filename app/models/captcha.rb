@@ -15,6 +15,10 @@ class Captcha < ApplicationRecord
   def self.valid_phone? phone
     /1[0-9]{10}/ =~ phone
   end
+
+  def self.valid_captcha? captcha
+    /[0-9]{6}/ =~ captcha
+  end
   
 
 

@@ -1,6 +1,6 @@
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    allows = ENV['GAME_ALLOWED_ORIGINS'].split(',')
+    allows = ENV['RENT_ALLOWED_ORIGINS'].split(',')
     origins allows
     resource '*',
       credentials: true,

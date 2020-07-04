@@ -61,16 +61,16 @@ Rails.application.configure do
 
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.perform_deliveries = true
-  config.action_mailer.default_url_options = { host: ENV['GAME_SERVER_HOST'], port: ENV['GAME_SERVER_PORT'],  protocol: ENV['GAME_SERVER_PROTOCOL'] }
+  config.action_mailer.default_url_options = { host: ENV['RENT_SERVER_HOST'], port: ENV['GAME_SERVER_PORT'],  protocol: ENV['GAME_SERVER_PROTOCOL'] }
   config.action_mailer.smtp_settings = {
-    :address => ENV['GAME_SUPPORT_MAIL_ADDRESS'],
-    :port => ENV['GAME_SUPPORT_MAIL_PORT'].to_i,
-    :domain => ENV['GAME_SUPPORT_MAIL_DOMAIN'], 
+    :address => ENV['RENT_SUPPORT_MAIL_ADDRESS'],
+    :port => ENV['RENT_SUPPORT_MAIL_PORT'].to_i,
+    :domain => ENV['RENT_SUPPORT_MAIL_DOMAIN'], 
     :authentication => :login,
     :enable_starttls_auto => true,
     :ssl => true,
-    user_name: ENV['GAME_SUPPORT_MAIL_ACCOUNT'],
-    password: ENV['GAME_SUPPORT_MAIL_PASSWORD'],
+    user_name: ENV['RENT_SUPPORT_MAIL_ACCOUNT'],
+    password: ENV['RENT_SUPPORT_MAIL_PASSWORD'],
   }
 
 

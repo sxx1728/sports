@@ -30,7 +30,7 @@ class Admin < ApplicationRecord
   rolify
   after_create :assign_default_role
   
-  acts_as_google_authenticated issuer: ENV['GAME_SERVER_HOST'], drift: 31
+  acts_as_google_authenticated issuer: ENV['RENT_SERVER_HOST'], drift: 31
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable

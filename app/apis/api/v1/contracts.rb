@@ -1,9 +1,9 @@
 module API
     module V1
       class  Transactions < Grape::API
-        resource :transactions do
+        resource :contracts do
 
-          desc '我的交易列表'
+          desc '我的合同列表'
           params do
             requires :token, type: String, desc: "user token"
             requires :state, type: String, desc: "查找交易的状态"
@@ -16,9 +16,9 @@ module API
             user = User.from_token params[:token]
             app_error('无效Token', 'invalid token') if user.nil?
             app_error('无效State', 'invalid state') if user.nil?
-            transactions = user.transactions.where(status: '')
+            contracts = user.contracts
  
-            present 1
+            present contracts, with: API::V1::Entities::Contracts
           end
 
           desc '交易详情, 包括各种状态'

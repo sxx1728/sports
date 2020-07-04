@@ -1,12 +1,13 @@
 module API
     module V1
-      class  Payments < Grape::API
-        resource :payments do
+      class  Bills < Grape::API
+        resource :bills do
 
           desc '收益相关'
           params do
+            requires :token, type: String, desc: "user token"
           end
-          post do
+          get 'index' do
             present 1
           end
 

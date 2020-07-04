@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_06_13_120738) do
+ActiveRecord::Schema.define(version: 2020_07_04_051625) do
 
   create_table "admins", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci", force: :cascade do |t|
     t.string "email", limit: 128, default: "", null: false
@@ -54,6 +54,60 @@ ActiveRecord::Schema.define(version: 2020_06_13_120738) do
     t.datetime "expire_at"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "contract_arbitrators", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci", force: :cascade do |t|
+    t.bigint "contract_id"
+    t.bigint "arbitrator_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["arbitrator_id"], name: "index_contract_arbitrators_on_arbitrator_id"
+    t.index ["contract_id"], name: "index_contract_arbitrators_on_contract_id"
+  end
+
+  create_table "contracts", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci", force: :cascade do |t|
+    t.bigint "renter_id"
+    t.bigint "owner_id"
+    t.bigint "promoter_id"
+    t.string "room_address"
+    t.string "room_district"
+    t.string "room_area"
+    t.string "room_relation"
+    t.string "room_no"
+    t.string "room_owner_name"
+    t.string "room_usage"
+    t.integer "room_capacity_min"
+    t.integer "room_capacity_max"
+    t.boolean "room_is_pledged"
+    t.string "trans_no"
+    t.string "trans_currency"
+    t.string "trans_monthly_price"
+    t.string "trans_pledge_amount"
+    t.string "trans_amount_pledge"
+    t.string "trans_payment_type"
+    t.string "trans_coupon_code"
+    t.string "trans_agency_fee_rate"
+    t.string "trans_agency_fee_by"
+    t.string "trans_peroid"
+    t.string "trans_begin_on"
+    t.string "trans_end_on"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["owner_id"], name: "index_contracts_on_owner_id"
+    t.index ["promoter_id"], name: "index_contracts_on_promoter_id"
+    t.index ["renter_id"], name: "index_contracts_on_renter_id"
+  end
+
+  create_table "kycs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "name", limit: 32
+    t.string "id_no", limit: 32
+    t.string "front_img"
+    t.string "back_img"
+    t.string "state"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_id"], name: "index_kycs_on_user_id"
   end
 
   create_table "roles", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci", force: :cascade do |t|

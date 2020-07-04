@@ -1,6 +1,8 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    aasm (5.0.8)
+      concurrent-ruby (~> 1.0)
     actioncable (6.0.0.rc1)
       actionpack (= 6.0.0.rc1)
       nio4r (~> 2.0)
@@ -97,6 +99,13 @@ GEM
       rack-test (>= 0.6.3)
       regexp_parser (~> 1.5)
       xpath (~> 3.2)
+    carrierwave (2.1.0)
+      activemodel (>= 5.0.0)
+      activesupport (>= 5.0.0)
+      addressable (~> 2.6)
+      image_processing (~> 1.1)
+      mimemagic (>= 0.3.0)
+      mini_mime (>= 0.1.3)
     childprocess (3.0.0)
     chronic (0.10.2)
     chunky_png (1.3.11)
@@ -193,6 +202,10 @@ GEM
     http_parser.rb (0.6.0)
     i18n (1.8.2)
       concurrent-ruby (~> 1.0)
+    image_processing (1.11.0)
+      mini_magick (>= 4.9.5, < 5)
+      ruby-vips (>= 2.0.17, < 3)
+    jwt (2.2.1)
     listen (3.1.5)
       rb-fsevent (~> 0.9, >= 0.9.4)
       rb-inotify (~> 0.9, >= 0.9.7)
@@ -206,6 +219,7 @@ GEM
       mimemagic (~> 0.3.2)
     method_source (0.9.2)
     mimemagic (0.3.5)
+    mini_magick (4.10.1)
     mini_mime (1.0.2)
     mini_portile2 (2.4.0)
     minitest (5.14.1)
@@ -286,6 +300,8 @@ GEM
       chunky_png (~> 1.0)
       rqrcode_core (~> 0.1)
     rqrcode_core (0.1.2)
+    ruby-vips (2.0.17)
+      ffi (~> 1.9)
     ruby2_keywords (0.0.2)
     ruby_dep (1.5.0)
     rubyzip (2.3.0)
@@ -365,6 +381,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  aasm
   annotate
   base32 (~> 0.3.2)
   base58
@@ -377,6 +394,7 @@ DEPENDENCIES
   capistrano-rvm
   capistrano3-puma
   capybara (>= 2.15)
+  carrierwave (~> 2.0)
   devise
   eth (= 0.4.10)
   ethereum.rb
@@ -388,6 +406,7 @@ DEPENDENCIES
   grape-swagger-rails
   haml (= 5.1.1)
   http (= 4.1.1)
+  jwt
   listen (>= 3.0.5, < 3.2)
   mysql2
   pry-nav

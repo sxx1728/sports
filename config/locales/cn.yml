@@ -30,22 +30,14 @@
 # available at https://guides.rubyonrails.org/i18n.html.
 
 cn:
-  hello: "您好！"
-  beam:
-    payout:
-      waiting: "待处理"
-      processing: "处理中"
-      canceled: "已取消"
-      transfered: "已转账"
-      failed: "已失败"
-      sending: "发送中"
-      unknown: "未知"
-  grin_c29:
-    payout:
-      paied: "已支付"
-      unpaied: "未支付"
-  ckb:
-    payout:
-      paied: "已支付"
-      unpaied: "未支付"
+  contract:
+    unsigned: "待生效"
+    signed: "生效中"
+    rejected: "已拒绝"
+    broken: "违约"
+    beAppealed: "被申诉"
+    appealed: "申诉中 "
+    arbitrating: "仲裁中"
+    finished: "已完成"
+    canceled: "已作废"
  

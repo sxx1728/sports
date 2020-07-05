@@ -10,7 +10,7 @@ server "118.178.125.228", user: "root", roles: %w{app db web}
 
 set :application, "rent"
 set :deploy_to, "/root/rent"
-set :repo_url, "git@github.com:sxx1728/game.git"
+set :repo_url, "git@github.com:sxx1728/rent.git"
 set :branch,        :master
 
 set :puma_threads,    [4, 16]

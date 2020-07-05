@@ -12,7 +12,7 @@
 
 ActiveRecord::Schema.define(version: 2020_07_04_051625) do
 
-  create_table "admins", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci", force: :cascade do |t|
+  create_table "admins", force: :cascade do |t|
     t.string "email", limit: 128, default: "", null: false
     t.string "encrypted_password", limit: 128, default: "", null: false
     t.string "reset_password_token", limit: 128
@@ -40,15 +40,15 @@ ActiveRecord::Schema.define(version: 2020_07_04_051625) do
     t.index ["unlock_token"], name: "index_admins_on_unlock_token", unique: true
   end
 
-  create_table "admins_roles", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci", force: :cascade do |t|
-    t.bigint "admin_id"
-    t.bigint "role_id"
+  create_table "admins_roles", id: false, force: :cascade do |t|
+    t.integer "admin_id"
+    t.integer "role_id"
     t.index ["admin_id", "role_id"], name: "index_admins_roles_on_admin_id_and_role_id"
     t.index ["admin_id"], name: "index_admins_roles_on_admin_id"
     t.index ["role_id"], name: "index_admins_roles_on_role_id"
   end
 
-  create_table "captchas", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci", force: :cascade do |t|
+  create_table "captchas", force: :cascade do |t|
     t.string "phone", limit: 16
     t.string "captcha", limit: 8
     t.datetime "expire_at"
@@ -56,14 +56,22 @@ ActiveRecord::Schema.define(version: 2020_07_04_051625) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
-  create_table "contracts", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci", force: :cascade do |t|
-    t.bigint "renter_id"
-    t.bigint "owner_id"
-    t.bigint "promoter_id"
+  create_table "coins", force: :cascade do |t|
+    t.string "name", limit: 32, default: "", null: false
+    t.string "addr", limit: 512, default: "", null: false
+    t.integer "decimals", default: 18, null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "contracts", force: :cascade do |t|
+    t.integer "renter_id"
+    t.integer "owner_id"
+    t.integer "promoter_id"
     t.string "state"
     t.string "room_address"
     t.string "room_district"
-    t.decimal "room_area", precision: 10
+    t.decimal "room_area"
     t.string "room_no"
     t.string "room_owner_name"
     t.string "room_usage"
@@ -73,12 +81,12 @@ ActiveRecord::Schema.define(version: 2020_07_04_051625) do
     t.string "room_certificate"
     t.string "trans_no"
     t.string "trans_currency"
-    t.decimal "trans_monthly_price", precision: 10
-    t.decimal "trans_pledge_amount", precision: 10
+    t.decimal "trans_monthly_price"
+    t.decimal "trans_pledge_amount"
     t.string "trans_amount_pledge"
     t.string "trans_payment_type"
     t.string "trans_coupon_code"
-    t.decimal "trans_agency_fee_rate", precision: 10
+    t.decimal "trans_agency_fee_rate"
     t.string "trans_agency_fee_by"
     t.integer "trans_period"
     t.date "trans_begin_on"
@@ -90,15 +98,15 @@ ActiveRecord::Schema.define(version: 2020_07_04_051625) do
     t.index ["renter_id"], name: "index_contracts_on_renter_id"
   end
 
-  create_table "contracts_users", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci", force: :cascade do |t|
-    t.bigint "contract_id"
-    t.bigint "user_id"
+  create_table "contracts_users", force: :cascade do |t|
+    t.integer "contract_id"
+    t.integer "user_id"
     t.index ["contract_id"], name: "index_contracts_users_on_contract_id"
     t.index ["user_id"], name: "index_contracts_users_on_user_id"
   end
 
-  create_table "kycs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci", force: :cascade do |t|
-    t.bigint "user_id"
+  create_table "kycs", force: :cascade do |t|
+    t.integer "user_id"
     t.string "name", limit: 32
     t.string "id_no", limit: 32
     t.string "front_img"
@@ -109,10 +117,10 @@ ActiveRecord::Schema.define(version: 2020_07_04_051625) do
     t.index ["user_id"], name: "index_kycs_on_user_id"
   end
 
-  create_table "roles", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci", force: :cascade do |t|
+  create_table "roles", force: :cascade do |t|
     t.string "name", limit: 32
     t.string "resource_type"
-    t.bigint "resource_id"
+    t.integer "resource_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["name", "resource_type", "resource_id"], name: "index_roles_on_name_and_resource_type_and_resource_id"
@@ -120,7 +128,25 @@ ActiveRecord::Schema.define(version: 2020_07_04_051625) do
     t.index ["resource_type", "resource_id"], name: "index_roles_on_resource_type_and_resource_id"
   end
 
-  create_table "users", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci", force: :cascade do |t|
+  create_table "rooms", force: :cascade do |t|
+    t.integer "no", default: 0, null: false
+    t.string "price_addr", limit: 512, default: "", null: false
+    t.string "join_coin_addr", limit: 512, default: "", null: false
+    t.integer "time_level", default: 0, null: false
+    t.bigint "invent_level", default: 0, null: false
+    t.integer "player_number", default: 0, null: false
+    t.integer "winer_number", default: 0, null: false
+    t.boolean "is_deleted", default: false, null: false
+    t.integer "rate", default: 0, null: false
+    t.integer "cur_round", default: 0, null: false
+    t.datetime "begin_at", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "next_round_at"
+    t.integer "interval_minute"
+  end
+
+  create_table "users", force: :cascade do |t|
     t.string "phone", limit: 16
     t.string "type", limit: 16
     t.string "status", limit: 16

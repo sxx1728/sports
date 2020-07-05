@@ -1,0 +1,55 @@
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>系统用户列表</h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="#">系统用户管理</a></li>
+          <li class="breadcrumb-item active">用户列表</li>
+        </ol>
+      </div>
+    </div>
+  </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+  <!-- /.box-header -->
+  <div class="card-body p-0">
+    <table class="table table-bordered">
+      <tbody>
+      <tr>
+       <th>#</th>
+       <th>邮箱</th>
+       <th>登录次数</th>
+       <th>登录时间</th>
+       <th>登录IP</th>
+       <th>可用</th>
+       <th>权限</th>
+       <th>操作</th>
+       <th></th>
+      </tr>
+      <% @admins.each do |admin| %>
+        <tr>
+          <td><%= admin.id %></td>
+          <td><%= admin.email%></td>
+          <td><%= admin.sign_in_count%></td>
+          <td><%= brac_datetime(admin.current_sign_in_at)%></td>
+          <td><%= admin.current_sign_in_ip%></td>
+          <td><%= brac_boolean(admin.approved)%></td>
+          <td><%= admin.roles.map{|role| role.name }.join(',')%></td>
+          <td width=100px><%= admin.approved ? link_to(raw('<button type="button" class="btn btn-block btn-default">停用</button>'), approve_admin_path(admin), data: { confirm: '确定要关闭该管理员吗？' }) : link_to(raw('<button type="button" class="btn btn-block btn-primary">激活</button>'), approve_admin_path(admin), data: { confirm: '确定激活该管理员？' }) %> </td>
+          <td width=200px> <%= link_to(raw('<button type="button" class="btn btn-block btn-default">设置权限</button>'), admin_roles_path(admin)) %> </td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card-footer clearfix">
+    <ul class="pagination pagination-sm m-0 float-right">
+      <%= will_paginate @admins, :container => false %>
+    </ul>
+  </div>
+</section>

@@ -1,0 +1,34 @@
+= form_for @room, as: :room, url: @url do |f|
+  .card-body
+    .form-group
+      %label{for: "price_addr"} 选择竞猜币种
+      = f.select :price_addr, Coin.all.collect{|p|[p.name, p.addr]}, class: 'form-control', data: { behavior: 'select2' }, include_blank: "币种"
+
+    .form-group
+      %label{for: "join_coin_addr"} 选择投注币种
+      = f.select :join_coin_addr, Coin.all.collect{|p|[p.name, p.addr]}, class: 'form-control', data: { behavior: 'select2' }, include_blank: "币种"
+ 
+    .form-group
+      %label{for: "time_level"} 每轮游戏开放投注时长(x分钟) 
+      = f.text_field(:time_level, class: 'form-control', "placeholder": "输入分钟数")
+    .form-group
+      %label{for: "interval_minute"} 投注结束后开奖间隔时长(x分钟)，之后系统将自动开始结算
+      = f.text_field(:interval_minute, class: 'form-control', "placeholder": "输入分钟数")
+    .form-group
+      %label{for: "invent_level"} 投注额度（投注当前币种的金额）
+      = f.text_field(:invent_level, class: 'form-control', "placeholder": "投注额度")
+    .form-group
+      %label{for: "player_number"} 玩家人数上限数量
+      = f.text_field(:player_number, class: 'form-control', "placeholder": "输入数量")
+    .form-group
+      %label{for: "winer_number"} 获胜玩家数量
+      = f.text_field(:winer_number, class: 'form-control', "placeholder": "输入数量")
+    .form-group
+      %label{for: "rate"} 费率x%
+      = f.text_field(:rate, class: 'form-control', "placeholder": "输入费率")
+
+
+
+  .card-footer
+    %button.btn.btn-primary{type: "submit"} 提交
+    %button.btn.btn-default{type: "reset"} 重置

@@ -1,0 +1,29 @@
+%section.content-header
+  .container-fluid
+    .row.mb-2
+      .col-sm-6
+        %h1 币种列表
+      .col-sm-6 
+        %ol.breadcrumb.float-sm-right
+          %li.breadcrumb-item 币种管理
+          %li.breadcrumb-item.active 列表
+
+%section.content
+  .card.p-0
+    %table.table.table-bordered
+      %tbody
+        %tr
+          %th 币种名称
+          %th 币种合约地址
+          %th 币种精度
+        - @coins.each do |coin|
+          %tr
+            %td 
+              = coin.name
+            %td{style: "text-overflow = ellipsis;max-width: 100px;overflow: hidden;white-space: nowrap;resize: horizontal;"}
+              = coin.addr
+            %td 
+              = coin.decimals
+            %td 
+              = link_to(raw('<i class="far fa-trash-alt">&nbsp;</i>'), coin_path(coin), data: { confirm: '确定要删除该房间吗?'}, method: :delete )
+

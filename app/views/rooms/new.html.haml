@@ -1,0 +1,13 @@
+%section.content-header
+  .container-fluid
+    .row.mb-2
+      .col-sm-6
+        %h1 添加房间
+      .col-sm-6 
+        %ol.breadcrumb.float-sm-right
+          %li.breadcrumb-item 房间管理
+          %li.breadcrumb-item.active 添加
+
+%section.content
+  .card.card-primary
+    = render :partial => "form"

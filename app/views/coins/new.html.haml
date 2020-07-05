@@ -1,0 +1,13 @@
+%section.content-header
+  .container-fluid
+    .row.mb-2
+      .col-sm-6
+        %h1 添加代币
+      .col-sm-6 
+        %ol.breadcrumb.float-sm-right
+          %li.breadcrumb-item 代币管理
+          %li.breadcrumb-item.active 添加
+
+%section.content
+  .card.card-primary
+    = render :partial => "form"

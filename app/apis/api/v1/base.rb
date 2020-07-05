@@ -18,12 +18,14 @@ module API
       mount API::V1::Images
       mount API::V1::Captchas
       mount API::V1::Registrators
+      mount API::V1::Arbitrators
       mount API::V1::Bills
       mount API::V1::Kycs
       mount API::V1::Arbitraments
       mount API::V1::Home
       mount API::V1::Replies
       mount API::V1::Sessions
+      mount API::V1::Contracts
       mount API::V1::TransactionLogs
       mount API::V1::Transactions
       mount API::V1::TransactionArbitrators

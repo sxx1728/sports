@@ -7,7 +7,7 @@ class Kyc < ApplicationRecord
 
 
   include AASM
-  aasm do
+  aasm column: 'state' do
     state :verifing, initial: true
     state :accepted
     state :rejected

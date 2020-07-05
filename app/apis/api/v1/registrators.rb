@@ -7,7 +7,7 @@ module API
           params do
             requires :phone, type: String, desc: "phone number"
             requires :captcha, type: String, desc: "captcha"
-            requires :type, type: String, desc: "phone type: 'rent' ,'owner', 'promote', 'arbitrator'"
+            requires :type, type: String, desc: "phone type: 'renter' ,'owner', 'promoter', 'arbitrator'"
             requires :password_md5, type: String, desc: "password_md5, salt: rent-{password}-{phone}"
           end
           post do

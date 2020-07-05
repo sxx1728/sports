@@ -8,8 +8,8 @@
 #server "172.18.12.36", user: "ubuntu", roles: %w{app db web}
 server "118.178.125.228", user: "root", roles: %w{app db web}
 
-set :application, "game_admin"
-set :deploy_to, "/root/game_admin"
+set :application, "rent"
+set :deploy_to, "/root/rent"
 set :repo_url, "git@github.com:sxx1728/game.git"
 set :branch,        :master
 

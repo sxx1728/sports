@@ -79,8 +79,6 @@ group :development do
   gem 'capistrano-bundler', require: false
   gem 'capistrano3-puma', require: false
 
-  gem 'whenever', require: false
-
 end
 
 group :test do

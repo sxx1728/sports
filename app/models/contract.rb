@@ -1,12 +1,12 @@
 class Contract < ApplicationRecord
-  has_one :renter, class_name: "Renter::User"
-  has_one :owner, class_name: "Renter::User"
-  has_one :promoter, class_name: "Promoter::User"
-  has_many :arbitrator, class_name: "Arbitrator::User", through: :contract_arbitrators, :source: :arbitrator 
-  has_many :contract_arbitrators
+
+  belongs_to :renter, class_name: "Renter::User"
+  belongs_to :owner, class_name: "Owner::User"
+  belongs_to :promoter, class_name: "Promoter::User"
+  has_and_belongs_to_many :arbitrators, class_name: "Arbitrator::User"
 
   include AASM
-  aasm do
+  aasm column: 'state' do
     state :unsigned, initial: true
     state :signed
     state :rejected
@@ -35,11 +35,12 @@ class Contract < ApplicationRecord
     end
   end
 
+  def self.valid_state? state
+    self.aasm.states.map(&:name).include?(state.to_sym)
+  end
+
   def summary_desc
     "#{self.trans_monthly_price}#{self.trans_currency}/月"
   end
-
-
-
 
 end

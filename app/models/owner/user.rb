@@ -14,6 +14,6 @@
 #
 module Owner
   class User < User
-
+    has_many :contracts, foreign_key: "owner_id"
   end
 end

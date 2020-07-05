@@ -28,14 +28,8 @@ class User < ApplicationRecord
   end
 
   def self.generate_nick_name
-    "用户#{rand(1000000,9999999)}"
+    "用户#{SecureRandom.rand(1000000..9999999)}"
   end
-
-  def kyc_status
-    "用户#{rand(1000000,9999999)}"
-  end
-
-
 
 
 end

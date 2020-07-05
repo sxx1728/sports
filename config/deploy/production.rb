@@ -8,8 +8,8 @@
 #server "172.18.12.36", user: "ubuntu", roles: %w{app db web}
 server "172.16.21.190", user: "root", roles: %w{app db web}
 
-set :application, "game_admin"
-set :deploy_to, "/root/game_admin"
+set :application, "rent"
+set :deploy_to, "/root/rent"
 set :branch,        :master
 
 set :puma_threads,    [4, 16]

@@ -61,8 +61,26 @@ task :webpacker_precompile do
 
 end
 
+task :asset_pipeline_precompile do
+  run_locally do
+    with rails_env: :production do
+      execute :rm, "-rf public/assets"
+      execute :rails, "assets:precompile"
+    end
+  end
+
+  on roles(:app), in: :parallel do |server|
+    run_locally do
+      execute :rsync,
+        "-a --delete ./public/assets/ root@#{server.hostname}:#{shared_path}/public/assets/"
+    end
+  end
+
+end
+
 namespace :deploy do
   after  :deploy, :webpacker_precompile
+  after  :deploy, :asset_pipeline_precompile
   after  :finishing,    :cleanup
   after  :finishing,    :restart
 

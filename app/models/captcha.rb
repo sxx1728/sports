@@ -9,7 +9,6 @@ class Captcha < ApplicationRecord
 
   def generate_info  
     self.captcha = SecureRandom.rand(100000..999999)
-    binding.pry
     self.captcha = '123456' unless ENV['RENT_PRODUCTION'] == true
     self.expire_at = DateTime.current + 2.minutes
   end  

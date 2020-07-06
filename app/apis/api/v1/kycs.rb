@@ -27,7 +27,6 @@ module API
             app_error('无效Token', 'invalid token') if user.nil?
 
             kyc = user.kyc || user.build_kyc
-            binding.pry
 
             kyc.front_img = params[:front_img_file][:tempfile]
             kyc.back_img = params[:back_img_file][:tempfile]

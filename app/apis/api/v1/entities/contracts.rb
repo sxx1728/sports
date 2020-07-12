@@ -5,9 +5,7 @@ module API
         include API::Helpers
 
         expose :trans_no
-        expose trans_no: do |m, o|
-          "#{m.room_area}"
-        end
+        expose :room_area  
         expose :state_desc
         expose :state_color
         expose :trans_no

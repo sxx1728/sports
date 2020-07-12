@@ -3,6 +3,7 @@ class CreateAppeals < ActiveRecord::Migration[6.0]
     create_table :appeals do |t|
 
       t.references :contract
+      t.references :user
       t.datetime :at
       t.string :cause
       t.string :amount

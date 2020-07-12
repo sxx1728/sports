@@ -1,6 +1,7 @@
 class User < ApplicationRecord
 
   has_one :kyc
+  has_many :appeals
 
   TYPES = ['renter' ,'owner', 'promoter', 'arbitrator']
 

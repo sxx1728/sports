@@ -35,9 +35,18 @@ class Contract < ApplicationRecord
     end
     event :launch_appeal do
       transitions from: :running, 
-        to: :appealed, 
-        guard: Proc.new {|user, appeal_tx_id| self.renter == user or self.owner == user },
-        after: Proc.new {|user, appeal_tx_id| self.build_appeal(tx_id: appeal_tx_id, user: user) }
+        to: :renter_appealed, 
+        guard: Proc.new {|user, appeal_tx_id|
+          self.renter == user
+        },
+        after: Proc.new {|user, appeal_tx_id| self.build_appeal(tx_id: appeal_tx_id, user: user, at: DateTime.current).save! }
+      transitions from: :running, 
+        to: :owner_appealed, 
+        guard: Proc.new {|user, appeal_tx_id| 
+          self.owner == user
+        },
+        after: Proc.new {|user, appeal_tx_id| self.build_appeal(tx_id: appeal_tx_id, user: user, at: DateTime.current).save! }
+ 
     end
  
   end

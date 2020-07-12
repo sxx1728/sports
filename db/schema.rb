@@ -58,6 +58,7 @@ ActiveRecord::Schema.define(version: 2020_07_12_032948) do
 
   create_table "appeals", force: :cascade do |t|
     t.integer "contract_id"
+    t.integer "user_id"
     t.datetime "at"
     t.string "cause"
     t.string "amount"
@@ -65,6 +66,7 @@ ActiveRecord::Schema.define(version: 2020_07_12_032948) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["contract_id"], name: "index_appeals_on_contract_id"
+    t.index ["user_id"], name: "index_appeals_on_user_id"
   end
 
   create_table "bills", force: :cascade do |t|

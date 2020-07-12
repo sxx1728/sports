@@ -14,19 +14,25 @@ module API
             present user, with: API::V1::Entities::Profile
           end
 
-          desc '修改用户nick name'
+          desc '修改用户信息'
           params do
             requires :token, type: String, desc: "user token"
             requires :nick_name, type: String, desc: "user nick name"
+            requires :eth_wallet_address, type: String, desc: "eth 钱包地址"
           end
-          get do
+          put do
             user = User.from_token params[:token]
             app_error('无效Token', 401) if user.nil?
-            app_error('无效nick name', 'invalid nick name') if params[:nick_name].nil?
-            app_error('过长nick name', 'nick name too long') if params[:nick_name].length > 32
-            app_error('nick name已被占用', 'nick name repeat') if User.exists?(nick_name: params[:nick_name])
-
-            user.update(nick_name: params[:nick_name])
+            if params[:nick_name].present?
+              app_error('过长nick name') if params[:nick_name].length > 32
+              app_error('nick name已被占用') if User.exists?(nick_name: params[:nick_name])
+              user.update!(nick_name: params[:nick_name])
+            end
+            if params[:eth_wallet_address].present?
+              app_error('无效eth_wallet_address name') if params[:eth_wallet_address].length != 42
+              app_error('无法修改ETH钱包地址') if user.eth_wallet_address.present?
+              user.update!(eth_wallet_address: params[:eth_wallet_address])
+            end
 
             present 'succeed'
           end

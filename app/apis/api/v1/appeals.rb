@@ -27,13 +27,13 @@ module API
             present contract.appeal.id
           end
 
-          desc '查看仲裁相关'
+          desc '更新申诉材料相关'
           params do
             requires :token, type: String, desc: "user token"
-            requires :transaction_code, type: String, desc: "transaction code"
-            requires :arbitrament_code, type: String, desc: "arbitrament_code"
+            requires :appeal_id, type: String, desc: "appeal id"
+            requires :images, type: Array[File], desc: "申诉图片"
           end
-          get do
+          put do
             present 1
           end
 

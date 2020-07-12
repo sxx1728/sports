@@ -7,7 +7,7 @@ module API
           m.type.split('::')[1]
         end
         expose :nick_name
-        expose :wallet_address
+        expose :eth_wallet_address
         expose :phone
         expose :kyc, using: API::V1::Entities::Kyc
       end

@@ -9,7 +9,6 @@ module API
             requires :file, type: File, desc: "文件"
           end
           post do
-            binding.pry
             user = User.from_token params[:token]
             app_error('无效Token', 401) if user.nil?
 

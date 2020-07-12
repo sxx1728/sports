@@ -31,10 +31,33 @@ module API
           params do
             requires :token, type: String, desc: "user token"
             requires :appeal_id, type: String, desc: "appeal id"
-            requires :images, type: Array[File], desc: "申诉图片"
+            requires :images, type: Array[Integer], coerce_with: ->(val) { 
+              binding.pry 
+              val.split(/\D+/).map(&:to_i) 
+            },  desc: "申诉图片"
+            requires :cause, type: String, desc: "申诉理由"
+            requires :amount, type: Float, desc: "申诉金额"
           end
           put do
-            present 1
+            user = User.from_token params[:token]
+            app_error('无效Token', 401) if user.nil?
+
+            appeal = Appeal.find(params[:appeal_id]) rescue nil
+            app_error('无效appeal_id') if appeal.nil?
+
+            app_error('用户无权限') unless  appeal.user == user
+
+            app_error('申诉就有不能为空') unless params[:cause].present?
+            app_error('申诉金额不能为空') unless params[:amount].present?
+
+            images = params[:images].map{|img_id|
+              img = Image.find(img_id) rescue nil
+              app_error('图像ID无效') if img.nil? || img.user != user
+              img_id
+            }
+            appeal.update!(cause: params[:cause], amount: params[:amount], images: images)
+
+            present 'succeed'
           end
 
           desc '查看仲裁列表'

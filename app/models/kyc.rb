@@ -1,10 +1,9 @@
 class Kyc < ApplicationRecord
 
   belongs_to :user
-
-  mount_uploader :front_img, ImgUploader
-  mount_uploader :back_img, ImgUploader
-
+  
+  belongs_to :front_img, class_name: "Image"
+  belongs_to :back_img, class_name: "Image"
 
   include AASM
   aasm column: 'state' do

@@ -21,12 +21,13 @@ module API
             app_error('验证码已过期', 'captcha expired') unless captcha.expire_at >  DateTime.current
 
             app_error('手机号已占用', 'phone ocupied') if User.exists?(phone: params[:phone])
-            "#{params[:type].capitalize}::User".constantize.create(phone: params[:phone],
+            user = "#{params[:type].capitalize}::User".constantize.create(phone: params[:phone],
                         password_md5: params[:password_md5], 
                         nick_name: User.generate_nick_name)
 
             captcha.update(expire_at: DateTime.current)
-            present 'succeed'
+
+            present user, with: API::V1::Entities::Session
           end
 
         end

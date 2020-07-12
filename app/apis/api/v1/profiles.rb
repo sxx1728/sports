@@ -9,7 +9,7 @@ module API
           end
           get do
             user = User.from_token params[:token]
-            app_error('无效Token', 'invalid token') if user.nil?
+            app_error('无效Token', 401) if user.nil?
  
             present user, with: API::V1::Entities::Profile
           end
@@ -21,7 +21,7 @@ module API
           end
           get do
             user = User.from_token params[:token]
-            app_error('无效Token', 'invalid token') if user.nil?
+            app_error('无效Token', 401) if user.nil?
             app_error('无效nick name', 'invalid nick name') if params[:nick_name].nil?
             app_error('过长nick name', 'nick name too long') if params[:nick_name].length > 32
             app_error('nick name已被占用', 'nick name repeat') if User.exists?(nick_name: params[:nick_name])

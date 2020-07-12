@@ -14,6 +14,12 @@
 #
 module Owner
   class User < User
+
     has_many :contracts, foreign_key: "owner_id"
+
+    def has_permission? contract
+      contract.owner == self
+    end
+
   end
 end

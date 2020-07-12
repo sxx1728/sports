@@ -14,7 +14,7 @@ module API
           end
           get 'index' do
             user = User.from_token params[:token]
-            app_error('无效Token', 'invalid token') if user.nil?
+            app_error('无效Token', 401) if user.nil?
             app_error('无效State', 'invalid state') unless Contract.valid_state?(params[:state] )
             contracts = user.contracts.where(state: params[:state])
 
@@ -32,20 +32,62 @@ module API
             present contracts, with: API::V1::Entities::Contracts
           end
 
-          desc '交易详情, 包括各种状态'
+          desc '交易更新'
           params do
             requires :token, type: String, desc: "user token"
-            requires :transaction_id, type: String, desc: "交易编码"
+            requires :id, type: String, desc: "合同ID"
+            requires :action, type: String, desc: "合同操作[sign, reject, view, appeal, reply"
+          end
+          put do
+            user = User.from_token params[:token]
+            app_error('无效Token', 401) if user.nil?
+
+            contract = Contract.find params[:id] rescue nil
+            app_error('无效合同id', 'id') if contract.nil?
+
+
+            begin
+              case params[:action]
+              when 'sign'
+                contract.sign! user
+              when 'reject'
+                contract.reject! user
+              when 'cancel'
+                contract.cancel! user
+              else
+                app_error('非法操作', 'invalid action')
+              end
+            rescue AASM::InvalidTransition => e
+              app_error(e.message) 
+            end
+   
+            present 'succeed'
+          end
+
+          desc '交易详情'
+          params do
+            requires :token, type: String, desc: "user token"
+            requires :id, type: String, desc: "合同ID"
           end
           get do
-            present 1
+
+            user = User.from_token params[:token]
+            app_error('无效Token', 401) if user.nil?
+
+            contract = Contract.find params[:id] rescue nil
+            app_error('无效合同id', 'id') if contract.nil?
+
+            app_error('无权限') unless user.has_permission?(contract)
+
+            present contract, with: API::V1::Entities::Contract
           end
+
 
           desc '创建一个交易'
           params do
             requires :token, type: String, desc: "user token"
-            requires :renter_id, type: String, desc: "租客ID"
-            requires :owner_id, type: String, desc: "房东ID"
+            requires :renter_id, type: Integer, desc: "租客ID"
+            requires :owner_id, type: Integer, desc: "房东ID"
             requires :room, type: Hash do
               requires :address, type: String, desc: "房屋地址"
               requires :district, type: String, desc: "房屋所在小区"
@@ -75,16 +117,16 @@ module API
           end
           post do
             promoter = User.from_token params[:token]
-            app_error('无效Token', 'invalid token') if promoter.nil?
+            app_error('无效Token', 401) if promoter.nil?
 
-            renter = Renter::User.find(params[:renter_id])
+            renter = Renter::User.find(params[:renter_id]) rescue nil
             app_error('无效房客ID', 'invalid renter id') if renter.nil?
 
-            owner = Owner::User.find(params[:owner_id])
+            owner = Owner::User.find(params[:owner_id]) rescue nil
             app_error('无效房东ID', 'invalid owner id') if owner.nil?
 
 
-            renter = Renter::User.find(params[:renter_id])
+            renter = Renter::User.find(params[:renter_id]) rescue nil
             room = params[:room]
             trans = params[:trans]
 
@@ -123,13 +165,9 @@ module API
             contract.promoter = promoter;
 
             contract.arbitrators = arbitrators;
-            
-
             contract.save
             
-
-
-            present 1
+            present 'succeed'
           end
 
 

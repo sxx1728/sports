@@ -14,7 +14,7 @@ module API
           end
           get 'index' do
             user = User.from_token params[:token]
-            app_error('无效Token', 'invalid token') if user.nil?
+            app_error('无效Token', 401) if user.nil?
             app_error('无效State', 'invalid state') if user.nil?
             transactions = user.transactions.where(status: '')
  

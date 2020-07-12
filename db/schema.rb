@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_04_051625) do
+ActiveRecord::Schema.define(version: 2020_07_12_032948) do
 
   create_table "admins", force: :cascade do |t|
     t.string "email", limit: 128, default: "", null: false
@@ -46,6 +46,36 @@ ActiveRecord::Schema.define(version: 2020_07_04_051625) do
     t.index ["admin_id", "role_id"], name: "index_admins_roles_on_admin_id_and_role_id"
     t.index ["admin_id"], name: "index_admins_roles_on_admin_id"
     t.index ["role_id"], name: "index_admins_roles_on_role_id"
+  end
+
+  create_table "appeal_stuffs", force: :cascade do |t|
+    t.integer "appeal_id"
+    t.string "file"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["appeal_id"], name: "index_appeal_stuffs_on_appeal_id"
+  end
+
+  create_table "appeals", force: :cascade do |t|
+    t.integer "contract_id"
+    t.datetime "at"
+    t.string "cause"
+    t.string "amount"
+    t.string "tx_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["contract_id"], name: "index_appeals_on_contract_id"
+  end
+
+  create_table "bills", force: :cascade do |t|
+    t.integer "contract_id"
+    t.datetime "pay_at"
+    t.string "item"
+    t.decimal "amount"
+    t.string "tx_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["contract_id"], name: "index_bills_on_contract_id"
   end
 
   create_table "captchas", force: :cascade do |t|
@@ -86,6 +116,8 @@ ActiveRecord::Schema.define(version: 2020_07_04_051625) do
     t.string "trans_amount_pledge"
     t.string "trans_payment_type"
     t.string "trans_coupon_code"
+    t.string "trans_coupon_rate"
+    t.decimal "trans_agency_fee_rate_origin"
     t.decimal "trans_agency_fee_rate"
     t.string "trans_agency_fee_by"
     t.integer "trans_period"

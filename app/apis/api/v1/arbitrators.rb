@@ -10,7 +10,7 @@ module API
           get 'index' do
 
             user = User.from_token params[:token]
-            app_error('无效Token', 'invalid token') if user.nil?
+            app_error('无效Token', 401) if user.nil?
 
             rand_ids = Arbitrator::User.ids.sort_by{rand}.slice(0,5)
             users = Arbitrator::User.where(id: rand_ids)

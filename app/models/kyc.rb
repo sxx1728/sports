@@ -15,3 +15,8 @@ class Kyc < ApplicationRecord
 
 
 end
+
+
+
+
+

@@ -16,5 +16,10 @@ module Arbitrator
   class User < User
     has_and_belongs_to_many :contracts
 
+    def has_permission? contract
+      contract.arbitrators.include?(self)
+    end
+
+
   end
 end

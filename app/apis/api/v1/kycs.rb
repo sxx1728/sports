@@ -9,7 +9,7 @@ module API
           end
           get do
             user = User.from_token params[:token]
-            app_error('无效Token', 'invalid token') if user.nil?
+            app_error('无效Token', 401) if user.nil?
 
             kyc = user.kyc
 
@@ -24,7 +24,7 @@ module API
           end
           post do
             user = User.from_token params[:token]
-            app_error('无效Token', 'invalid token') if user.nil?
+            app_error('无效Token', 401) if user.nil?
 
             kyc = user.kyc || user.build_kyc
 
@@ -46,7 +46,7 @@ module API
           end
           post do
             user = User.from_token params[:token]
-            app_error('无效Token', 'invalid token') if user.nil?
+            app_error('无效Token', 401) if user.nil?
 
             
  

@@ -115,7 +115,7 @@ Rails.application.configure do
 
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.perform_deliveries = true
-  config.action_mailer.default_url_options = { host: ENV['RENT_SERVER_HOST'], port: ENV['GAME_SERVER_PORT'],  protocol: ENV['RENT_SERVER_PROTOCOL'] }
+  config.action_mailer.default_url_options = { host: ENV['RENT_SERVER_HOST'], port: ENV['RENT_SERVER_PORT'],  protocol: ENV['RENT_SERVER_PROTOCOL'] }
   config.action_mailer.smtp_settings = {
     :address => ENV['RENT_SUPPORT_MAIL_ADDRESS'],
     :port => ENV['RENT_SUPPORT_MAIL_PORT'].to_i,

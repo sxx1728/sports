@@ -26,6 +26,8 @@ class CreateContracts < ActiveRecord::Migration[6.0]
       t.string :trans_amount_pledge
       t.string :trans_payment_type
       t.string :trans_coupon_code
+      t.string :trans_coupon_rate
+      t.decimal :trans_agency_fee_rate_origin
       t.decimal :trans_agency_fee_rate
       t.string :trans_agency_fee_by
       t.integer :trans_period

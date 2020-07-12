@@ -1,0 +1,2 @@
+class AppealStuff < ApplicationRecord
+end

@@ -21,7 +21,7 @@ module API
       mount API::V1::Arbitrators
       mount API::V1::Bills
       mount API::V1::Kycs
-      mount API::V1::Arbitraments
+      mount API::V1::Appeals
       mount API::V1::Home
       mount API::V1::Replies
       mount API::V1::Sessions

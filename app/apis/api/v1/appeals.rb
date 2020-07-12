@@ -1,19 +1,30 @@
 module API
     module V1
-      class  Arbitraments < Grape::API
-        resource :arbitraments do
+      class  Appeals < Grape::API
+        resource :appeals do
 
-          desc '创建仲裁相关'
+          desc '创建申诉相关'
           params do
             requires :token, type: String, desc: "user token"
-            requires :transaction_code, type: String, desc: "transaction code"
-            requires :at, type: DateTime, desc: "submit time"
-            requires :cause, type: String, desc: "arbitratment cause"
-            requires :stuff_images, type: Array[String], desc: "申诉材料图片列表"
-            requires :amount, type: Float, desc: "争议金额"
+            requires :contract_id, type: String, desc: "transaction code"
+            requires :appeal_tx_id, type: String, desc: "申诉上链交易ID"
           end
           post do
-            present 1
+            user = User.from_token params[:token]
+            app_error('无效Token', 401) if user.nil?
+
+            contract = Contract.find params[:contract_id] rescue nil
+            app_error('无效合同id') if contract.nil?
+
+            app_error('无效仲裁tx') unless contract.check_appeal_tx_id?(params[:appeal_tx_id])
+
+            begin
+              contract.launch_appeal user, params[:appeal_tx_id]
+            rescue AASM::InvalidTransition => e
+              app_error(e.message)
+            end
+
+            present contract.appeal.id
           end
 
           desc '查看仲裁相关'

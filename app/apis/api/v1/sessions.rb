@@ -32,7 +32,7 @@ module API
 
           user = User.from_token params[:token]
 
-          app_error('无效Token', 'invalid token') if user.nil?
+          app_error('无效Token', 401) if user.nil?
           app_error('错误旧密码', 'incorrect old password') unless user.password_md5 == params['old_password_md5']
 
           user.update!(password_md5: params[:new_password_md5])

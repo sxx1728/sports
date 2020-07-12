@@ -11,7 +11,7 @@ module API
           get 'index' do
 
             user = User.from_token params[:token]
-            app_error('无效Token', 'invalid token') if user.nil?
+            app_error('无效Token', 401) if user.nil?
             app_error('无效类型', 'invalid type') unless User.valid_type? params[:type]
             users
 

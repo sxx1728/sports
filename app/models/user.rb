@@ -18,18 +18,23 @@ class User < ApplicationRecord
   end
 
   def self.from_token token
-    payload = JWT.decode token, ENV['RENT_JWT_SECRET'], true, { algorithm: 'HS256' }
+    payload = JWT.decode token, ENV['RENT_JWT_SECRET'], true, { algorithm: 'HS256' } rescue nil
 
-    return nil if payload.empty?
+    return nil if payload.nil? || payload.empty?
     user_id = payload[0]["id"]
     return nil if user_id.blank?
 
-    User.find(user_id)
+    User.find(user_id) rescue nil
   end
 
   def self.generate_nick_name
     "用户#{SecureRandom.rand(1000000..9999999)}"
   end
 
+  def has_permission? contract
+    false
+  end
 
+
+  
 end

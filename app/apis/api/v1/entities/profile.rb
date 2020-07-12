@@ -4,7 +4,7 @@ module API
       class Profile < Grape::Entity
         include API::Helpers
         expose :type do |m, o|
-          m.type.split('::')[1]
+          m.type.split('::')[0]
         end
         expose :nick_name
         expose :eth_wallet_address

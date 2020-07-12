@@ -6,10 +6,18 @@ module API
           desc '上传image'
           params do
             requires :token, type: String, desc: "user token"
-            requires :image_file, type: File, desc: "user token"
+            requires :file, type: File, desc: "文件"
           end
           post do
-            present 1
+            binding.pry
+            user = User.from_token params[:token]
+            app_error('无效Token', 401) if user.nil?
+
+            image = Image.new(user: user)
+            image.file = params[:file][:tempfile]
+            image.save!
+
+            present image.id
           end
 
         end

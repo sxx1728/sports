@@ -6,7 +6,7 @@ module API
           desc '我的合同列表'
           params do
             requires :token, type: String, desc: "user token"
-            requires :state, type: String, desc: "查找交易的状态"
+            requires :state, type: String, desc: "查找交易的状态[all, unsigned, running, broken, appealed, appealing, arbitrating, finished, canceled]"
             requires :order_by, type: String, desc: "排序类型[time, amount, currency]"
             requires :is_asc, type: Boolean, desc: "是否升序排列"
             requires :page, type: Integer, desc: "页号"
@@ -27,6 +27,8 @@ module API
             when 'currency'
               contracts = contracts.order(trans_currency: direction)
             end
+
+            contracts = contracts.where(state: params[:state])
             contracts = contracts.paginate(page: params[:page], per_page: params[:per_page])
 
             present contracts, with: API::V1::Entities::Contracts

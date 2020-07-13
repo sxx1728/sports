@@ -18,7 +18,7 @@ class Contract < ApplicationRecord
     state :renter_appealed
     state :owner_appealed
     state :arbitrating
-    state :ended
+    state :finished
     state :canceled
 
     event :sign do

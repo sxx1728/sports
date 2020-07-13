@@ -6,6 +6,9 @@ class Contract < ApplicationRecord
   has_and_belongs_to_many :arbitrators, class_name: "Arbitrator::User"
   has_many :bills
   has_one :appeal
+  has_one :reply
+
+  has_many :arbitrament, class_name: "ContractsUsers"
 
   include AASM
   aasm column: 'state' do
@@ -43,10 +46,23 @@ class Contract < ApplicationRecord
       transitions from: :running, 
         to: :owner_appealed, 
         guard: Proc.new {|user, appeal_tx_id| 
-          self.owner == user
+          self.owner == user 
         },
         after: Proc.new {|user, appeal_tx_id| self.build_appeal(tx_id: appeal_tx_id, user: user, at: DateTime.current).save! }
  
+    end
+
+    event :launch_reply do
+      transitions from: :renter_appealed, 
+        to: :arbitrating, 
+        guard: Proc.new {|user|
+          self.owner == user 
+        }
+      transitions from: :owner_appealed, 
+        to: :arbitrating, 
+        guard: Proc.new {|user| 
+          self.renter == user
+        }
     end
  
   end

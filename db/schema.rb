@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_12_171455) do
+ActiveRecord::Schema.define(version: 2020_07_13_175401) do
 
   create_table "admins", force: :cascade do |t|
     t.string "email", limit: 128, default: "", null: false
@@ -158,6 +158,18 @@ ActiveRecord::Schema.define(version: 2020_07_12_171455) do
     t.integer "front_img_id"
     t.integer "back_img_id"
     t.index ["user_id"], name: "index_kycs_on_user_id"
+  end
+
+  create_table "replies", force: :cascade do |t|
+    t.integer "contract_id"
+    t.integer "user_id"
+    t.datetime "at"
+    t.string "reply"
+    t.string "images"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["contract_id"], name: "index_replies_on_contract_id"
+    t.index ["user_id"], name: "index_replies_on_user_id"
   end
 
   create_table "roles", force: :cascade do |t|

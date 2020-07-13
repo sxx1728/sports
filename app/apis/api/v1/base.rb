@@ -26,11 +26,6 @@ module API
       mount API::V1::Replies
       mount API::V1::Sessions
       mount API::V1::Contracts
-      mount API::V1::TransactionLogs
-      mount API::V1::Transactions
-      mount API::V1::TransactionArbitrators
-      mount API::V1::TransactionDetails
-      mount API::V1::TransactionRooms
 
       namespace :doc do
         

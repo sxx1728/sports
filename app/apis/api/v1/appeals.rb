@@ -15,11 +15,12 @@ module API
 
             contract = Contract.find params[:contract_id] rescue nil
             app_error('无效合同id') if contract.nil?
+            app_error('无效合同状态') unless contract.running?
 
             app_error('无效仲裁tx') unless contract.check_appeal_tx_id?(params[:appeal_tx_id])
 
             begin
-              contract.launch_appeal user, params[:appeal_tx_id]
+              contract.launch_appeal!(user, params[:appeal_tx_id])
             rescue AASM::InvalidTransition => e
               app_error(e.message)
             end
@@ -32,7 +33,6 @@ module API
             requires :token, type: String, desc: "user token"
             requires :appeal_id, type: String, desc: "appeal id"
             requires :images, type: Array[Integer], coerce_with: ->(val) { 
-              binding.pry 
               val.split(/\D+/).map(&:to_i) 
             },  desc: "申诉图片"
             requires :cause, type: String, desc: "申诉理由"
@@ -60,18 +60,21 @@ module API
             present 'succeed'
           end
 
-          desc '查看仲裁列表'
+          desc '查看申诉详情'
           params do
             requires :token, type: String, desc: "user token"
-            requires :arbitrament_code, type: String, desc: "arbitrament_code"
-            requires :status, type: String, desc: "仲裁状态查找"
-            requires :order_by, type: String, desc: "排序字段"
-            requires :is_asc, type: Boolean, desc: "是否增序"
-            requires :page_num, type: Integer, desc: "页号"
-            requires :page_size, type: Integer, desc: "每页大小"
+            requires :contract_id, type: String, desc: "transaction code"
           end
           get do
-            present 1
+            user = User.from_token params[:token]
+            app_error('无效Token', 401) if user.nil?
+
+            contract = Contract.find params[:contract_id] rescue nil
+            app_error('无效合同id') if contract.nil?
+
+            app_error('用户无权限') unless  contract.renter == user or contract.owner == user or contract.arbitrators.include?(user)
+
+            present contract.appeal, with: API::V1::Entities::Appeal
           end
 
 

@@ -122,10 +122,10 @@ module API
             app_error('无效Token', 401) if promoter.nil?
 
             renter = Renter::User.find(params[:renter_id]) rescue nil
-            app_error('无效房客ID', 'invalid renter id') if renter.nil?
+            app_error('无效房客ID') if renter.nil?
 
             owner = Owner::User.find(params[:owner_id]) rescue nil
-            app_error('无效房东ID', 'invalid owner id') if owner.nil?
+            app_error('无效房东ID') if owner.nil?
 
 
             renter = Renter::User.find(params[:renter_id]) rescue nil
@@ -133,7 +133,7 @@ module API
             trans = params[:trans]
 
             arbitrators = Arbitrator::User.where(id: params[:arbitrators])
-            app_error('无效仲裁ID', 'invalid arbitrators id') unless arbitrators.size == 5
+            app_error('无效仲裁ID, 最少5人') unless arbitrators.size == 5
 
             room = params[:room]
             trans = params[:trans]

@@ -13,10 +13,10 @@ module API
           m.kyc.id_no rescue nil
         end
         expose :front_img_url do |m, o| 
-          m.kyc.front_img_url rescue nil
+          m.kyc.front_img.file_url rescue nil
         end
         expose :back_img_url do |m, o| 
-          m.kyc.back_img_url rescue nil
+          m.kyc.back_img.file_url rescue nil
         end
  
       end

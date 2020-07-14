@@ -6,17 +6,16 @@ module API
           desc '我的合同列表'
           params do
             requires :token, type: String, desc: "user token"
-            requires :state, type: String, desc: "查找交易的状态[all, unsigned, running, broken, appealed, appealing, arbitrating, finished, canceled]"
+            requires :state, type: String, values: ['all', 'unsigned', 'running', 'broken', 'appealed', 'appealing', 'arbitrating', 'finished', 'canceled'], desc: "查找交易的状态"
             requires :order_by, type: String, desc: "排序类型[time, amount, currency]"
             requires :is_asc, type: Boolean, desc: "是否升序排列"
-            requires :page, type: Integer, desc: "页号"
-            requires :per_page, type: Integer, desc: "大小"
+            requires :page, type: Integer,  desc: "页号" 
+            requires :per_page, type: Integer, values: 1..50, desc: "大小"
           end
           get 'index' do
             user = User.from_token params[:token]
             app_error('无效Token', 401) if user.nil?
-            app_error('无效State', 'invalid state') unless Contract.valid_state?(params[:state] )
-            contracts = user.contracts.where(state: params[:state])
+            contracts = user.contracts
 
             direction = params[:is_asc] ? :asc : :desc
             case params[:order_by]
@@ -28,10 +27,37 @@ module API
               contracts = contracts.order(trans_currency: direction)
             end
 
-            contracts = contracts.where(state: params[:state])
+            case params[:state]
+            when 'all'
+              contracts = contracts
+            when 'running', 'broken', 'arbitrating', 'finished', 'canceled'
+              contracts = contracts.where(state: params[:state])
+            when 'unsigned'
+              contracts = contracts.where(state: ['unsigned', 'renter_signed', 'owner_signed'])
+            when 'appealed'
+              if user.type == 'Renter::User'
+                contracts = contracts.where(state: 'owner_appealed')
+              elsif user.type == 'Owner::User'
+                contracts = contracts.where(state: 'renter_appealed')
+              else
+                contracts = contracts.where(state: 'invalid')
+              end
+            when 'appealing'
+              if user.type == 'Renter::User'
+                contracts = contracts.where(state: 'renter_appealed')
+              elsif user.type == 'Owner::User'
+                contracts = contracts.where(state: 'owner_appealed')
+              else
+                contracts = contracts.where(state: 'invalid')
+              end
+            else 
+              app_error('无效State', 'invalid state')
+            end
             contracts = contracts.paginate(page: params[:page], per_page: params[:per_page])
 
-            present contracts, with: API::V1::Entities::Contracts
+            present :contracts, contracts, with: API::V1::Entities::Contracts, user: user
+
+            present :pages, contracts.total_pages
           end
 
           desc '交易更新'

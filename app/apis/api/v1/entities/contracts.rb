@@ -4,12 +4,17 @@ module API
       class Contracts < Grape::Entity
         include API::Helpers
 
-        expose :trans_no
+        expose :id
         expose :room_area  
-        expose :state_desc
-        expose :state_color
+        expose :state_desc do |m,o| 
+          m.state_desc o[:user]
+        end
         expose :trans_no
-        expose :summary_desc
+        expose :trans_payment_type
+        expose :trans_monthly_price
+        expose :trans_currency
+        expose :trans_begin_on
+        expose :trans_end_on
       end
     end
   end

@@ -67,10 +67,6 @@ class Contract < ApplicationRecord
  
   end
 
-  def state_desc 
-    I18n.t("contract.#{self.state}")
-  end
-
   def state_color
     case self.state
     when 'unsigned'
@@ -84,18 +80,36 @@ class Contract < ApplicationRecord
     end
   end
 
-  def self.valid_state? state
-    self.aasm.states.map(&:name).include?(state.to_sym)
-  end
+  def state_desc user
+    case self.state
+    when 'running', 'broken', 'arbitrating', 'finished', 'canceled'
+      return self.state
+    when 'unsigned', 'renter_signed', 'owner_signed'
+      return 'unsigned'
+    when 'renter_appealed'
+      if user.type == 'Renter::User' 
+        return 'appealing'
+      elsif user.type == 'Owner::User'
+        return 'appealed'
+      else
+        return 'none'
+      end
+    when 'onwer_appealed'
+      if user.type == 'Renter::User' and 
+        return 'appealed'
+      elsif user.type == 'Owner::User'
+        return 'appealing'
+      else
+        return 'none'
+      end
+    else 
+      return 'none'
+    end
 
-  def summary_desc
-    "#{self.trans_monthly_price}#{self.trans_currency}/月"
   end
 
   def check_appeal_tx_id? appeal_tx_id
     true
   end
-
-
 
 end

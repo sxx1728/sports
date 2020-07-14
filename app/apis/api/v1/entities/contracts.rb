@@ -15,6 +15,7 @@ module API
         expose :trans_currency
         expose :trans_begin_on
         expose :trans_end_on
+        expose :room_district
       end
     end
   end

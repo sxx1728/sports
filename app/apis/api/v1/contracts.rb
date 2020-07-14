@@ -104,10 +104,10 @@ module API
             end
             requires :trans, type: Hash do
               requires :no, type: String, desc: "租赁协议编号"
-              requires :currency, type: String, desc: "交易币种"
+              requires :currency, type: String, desc: "交易币种[ETH]"
               requires :monthly_price, type: Float, desc: "月房租"
               requires :pledge_amount, type: Float, desc: "抵押金额"
-              requires :payment_type, type: String, desc: "支付模式"
+              requires :payment_type, type: String, desc: "支付模式[pleage1pay3, pleage1pay1]"
               requires :coupon_code, type: String, desc: "优惠码"
               requires :agency_fee_rate, type: Float, desc: "代理费率"
               requires :agency_fee_by, type: String, desc: "中介费谁支付"

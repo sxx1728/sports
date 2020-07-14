@@ -167,9 +167,9 @@ module API
             contract.promoter = promoter;
 
             contract.arbitrators = arbitrators;
-            contract.save
+            contract.save!
             
-            present 'succeed'
+            present contract.id
           end
 
 

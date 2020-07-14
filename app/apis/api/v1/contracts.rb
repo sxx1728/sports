@@ -115,7 +115,8 @@ module API
               requires :begin_on, type: Date, desc: "起租日"
               requires :end_on, type: Date, desc: "结束日"
             end
-            requires :arbitrators, type: Array[Integer], coerce_with: ->(val) { val.split(/(\s+)|,/).map(&:to_i) }
+            #requires :arbitrators, type: Array[Integer], coerce_with: ->(val) { val.split(/(\s+)|,/).map(&:to_i) }
+            requires :arbitrators, type: Array[Integer], desc: "仲裁者列表"
           end
           post do
             promoter = User.from_token params[:token]

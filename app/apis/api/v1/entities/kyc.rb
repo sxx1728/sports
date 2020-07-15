@@ -4,19 +4,19 @@ module API
       class Kyc < Grape::Entity
         include API::Helpers
         expose :status do |m, o|
-          m.kyc.status rescue 'none'
+          m.status rescue 'none'
         end
         expose :name do |m, o|
-          m.kyc.name rescue nil
+          m.name rescue nil
         end
         expose :id_no do |m, o| 
-          m.kyc.id_no rescue nil
+          m.id_no rescue nil
         end
         expose :front_img_url do |m, o| 
-          m.kyc.front_img.file_url rescue nil
+          m.front_img.file_url rescue nil
         end
         expose :back_img_url do |m, o| 
-          m.kyc.back_img.file_url rescue nil
+          m.back_img.file_url rescue nil
         end
  
       end

@@ -11,9 +11,7 @@ module API
             user = User.from_token params[:token]
             app_error('无效Token', 401) if user.nil?
 
-            kyc = user.kyc
-
-            present user, with: API::V1::Entities::Kyc
+            present user.kyc, with: API::V1::Entities::Kyc
           end
 
           desc '添加KYC'

@@ -43,9 +43,7 @@ module API
 
         expose :state
 
-        expose :arbitrators, using: API::V1::Entities::Arbitrators do |m,o|
-          m.arbitrators
-        end
+        expose :arbitrators, using: API::V1::Entities::Arbitrators
       end
     end
   end

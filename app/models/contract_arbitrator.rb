@@ -1,2 +1,0 @@
-class ContractArbitrator < ApplicationRecord
-end

@@ -34,7 +34,7 @@ class User < ApplicationRecord
   end
 
   def has_permission? contract
-    false
+    self == contract.renter || self == contract.owner || self == contract.promoter || contract.arbitrators.incldue?(self)
   end
 
 

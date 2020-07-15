@@ -18,6 +18,7 @@ module API
           params do
             requires :token, type: String, desc: "user token"
             requires :nick_name, type: String, desc: "user nick name"
+            requires :desc, type: String, desc: "介绍"
             requires :eth_wallet_address, type: String, desc: "eth 钱包地址"
           end
           put do
@@ -35,6 +36,10 @@ module API
               user.update!(eth_wallet_address: params[:eth_wallet_address])
             end
 
+            if params[:desc].present?
+              app_error('过长nick name') if params[:desc].length > 1024
+              user.update!(desc: params[:desc])
+            end
             present 'succeed'
           end
 

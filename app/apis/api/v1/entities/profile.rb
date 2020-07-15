@@ -9,6 +9,7 @@ module API
         expose :nick_name
         expose :eth_wallet_address
         expose :phone
+        expose :desc
         expose :kyc, using: API::V1::Entities::Kyc
       end
     end

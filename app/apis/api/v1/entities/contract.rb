@@ -41,7 +41,9 @@ module API
         expose :trans_begin_on
         expose :trans_end_on
 
-        expose :state
+        expose :state do|m, o|
+          m.state_desc o[:user]
+        end
 
         expose :arbitrators, using: API::V1::Entities::Arbitrators
       end

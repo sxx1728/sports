@@ -107,7 +107,7 @@ module API
 
             app_error('无权限') unless user.has_permission?(contract)
 
-            present contract, with: API::V1::Entities::Contract
+            present contract, with: API::V1::Entities::Contract, user: user
           end
 
 

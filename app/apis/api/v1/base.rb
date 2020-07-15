@@ -26,6 +26,7 @@ module API
       mount API::V1::Replies
       mount API::V1::Sessions
       mount API::V1::Contracts
+      mount API::V1::Arbitraments
 
       namespace :doc do
         

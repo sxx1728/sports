@@ -4,6 +4,7 @@ class AddArbitramentToContractsUsers < ActiveRecord::Migration[6.0]
     add_column :contracts_users, :owner_rate, :decimal
     add_column :contracts_users, :images, :string
     add_column :contracts_users, :at, :DateTime
+    add_column :contracts_users, :desc, :String
   end
 
   def down
@@ -11,6 +12,7 @@ class AddArbitramentToContractsUsers < ActiveRecord::Migration[6.0]
     remove_column :contracts_users, :owner_rate
     remove_column :contracts_users, :images
     remove_column :contracts_users, :at
+    remove_column :contracts_users, :desc
   end
 
 end

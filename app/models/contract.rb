@@ -27,8 +27,8 @@ class Contract < ApplicationRecord
     event :sign do
       transitions from: :unsigned, to: :renter_signed, guard: Proc.new {|user| self.renter == user }
       transitions from: :unsigned, to: :owner_signed, guard: Proc.new {|user| self.owner == user }
-      transitions from: :renter_signed, to: :signed, guard: Proc.new {|user| self.owner == user }
-      transitions from: :owner_signed, to: :signed, guard: Proc.new {|user| self.renter == user }
+      transitions from: :renter_signed, to: :running, guard: Proc.new {|user| self.owner == user }
+      transitions from: :owner_signed, to: :running, guard: Proc.new {|user| self.renter == user }
     end
     event :reject do
       transitions from: [:unsigned, :renter_signed, :owner_signed], to: :rejected

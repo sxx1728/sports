@@ -7,6 +7,7 @@ class Contract < ApplicationRecord
   has_many :bills
   has_one :appeal
   has_one :reply
+  has_many :transactions
 
   has_many :arbitrament, class_name: "ContractsUsers"
 
@@ -41,15 +42,12 @@ class Contract < ApplicationRecord
         to: :renter_appealed, 
         guard: Proc.new {|user, appeal_tx_id|
           self.renter == user
-        },
-        after: Proc.new {|user, appeal_tx_id| self.build_appeal(tx_id: appeal_tx_id, user: user, at: DateTime.current).save! }
+        }
       transitions from: :running, 
         to: :owner_appealed, 
         guard: Proc.new {|user, appeal_tx_id| 
           self.owner == user 
-        },
-        after: Proc.new {|user, appeal_tx_id| self.build_appeal(tx_id: appeal_tx_id, user: user, at: DateTime.current).save! }
- 
+        } 
     end
 
     event :launch_reply do
@@ -67,17 +65,16 @@ class Contract < ApplicationRecord
  
   end
 
-  def state_color
-    case self.state
-    when 'unsigned'
-      'yellow'
-    when 'signed'
-      'green'
-    when 'rejected', 'beAppealed'
-      'red'
-    when 'appealed', 'arbitrating', 'finished', 'canceled'
-      'gray'
-    end
+  def log_transaction_renter_appeal
+    content = "房客(#{self.renter.nickanme} ID: #{self.renter.id}), 发起申诉 "
+    transaction = self.build_transaction(at: DateTime.current, content: content)
+    transaction.save! 
+  end
+
+  def log_transaction_owner_appeal
+    content = "房东(#{self.renter.nickanme} ID: #{self.renter.id}), 发起申诉 "
+    transaction = self.build_transaction(at: DateTime.current, content: content)
+    transaction.save! 
   end
 
   def state_desc user
@@ -106,10 +103,6 @@ class Contract < ApplicationRecord
       return 'none'
     end
 
-  end
-
-  def check_appeal_tx_id? appeal_tx_id
-    true
   end
 
 end

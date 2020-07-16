@@ -8,7 +8,7 @@ module API
             requires :token, type: String, desc: "user token"
             requires :contract_id, type: String, desc: "transaction code"
           end
-          post do
+          get do
             user = User.from_token params[:token]
             app_error('无效Token', 401) if user.nil?
 
@@ -61,7 +61,7 @@ module API
             end
 
 
-            present 'succeed'
+            present contract.reply, with: API::V1::Entities::Reply
           end
 
 

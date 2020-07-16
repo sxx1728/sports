@@ -30,6 +30,31 @@ module API
             present user, with: API::V1::Entities::Session
           end
 
+
+          desc '设置新密码'
+          params do
+            requires :phone, type: String, desc: "phone number"
+            requires :captcha, type: String, desc: "captcha"
+            requires :password_md5, type: String, desc: "password_md5, salt: rent-{password}-{phone}"
+          end
+          put do
+            app_error('无效电话') unless Captcha.valid_phone? params[:phone]
+            app_error('无效验证码') unless Captcha.valid_captcha? params[:captcha]
+            app_error('验证码错误') unless Captcha.where(phone: params[:phone], captcha: params[:captcha]).exists?
+            app_error('无效密码') unless params[:password_md5].present?
+
+            captcha = Captcha.where(phone: params[:phone], captcha: params[:captcha]).last;
+            app_error('验证码已过期') unless captcha.expire_at >  DateTime.current
+            captcha.update(expire_at: DateTime.current)
+
+            user = User.where(phone: params[:phone]).first
+            app_error('用户未注册') if use.nil?
+
+            user.update!(password_md5, parmas[:password_md5])
+
+            present 'succeed'
+          end
+
         end
       end
     end

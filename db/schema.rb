@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_15_141334) do
+ActiveRecord::Schema.define(version: 2020_07_16_142225) do
 
   create_table "admins", force: :cascade do |t|
     t.string "email", limit: 128, default: "", null: false
@@ -136,10 +136,12 @@ ActiveRecord::Schema.define(version: 2020_07_15_141334) do
   create_table "contracts_users", force: :cascade do |t|
     t.integer "contract_id"
     t.integer "user_id"
-    t.decimal "renter_rate"
-    t.decimal "owner_rate"
+    t.integer "renter_rate"
+    t.integer "owner_rate"
     t.string "images"
     t.datetime "at"
+    t.string "desc"
+    t.boolean "done", default: false
     t.index ["contract_id"], name: "index_contracts_users_on_contract_id"
     t.index ["user_id"], name: "index_contracts_users_on_user_id"
   end
@@ -203,6 +205,16 @@ ActiveRecord::Schema.define(version: 2020_07_15_141334) do
     t.datetime "updated_at", precision: 6, null: false
     t.datetime "next_round_at"
     t.integer "interval_minute"
+  end
+
+  create_table "transactions", force: :cascade do |t|
+    t.integer "contract_id"
+    t.datetime "at"
+    t.string "content"
+    t.string "tx_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["contract_id"], name: "index_transactions_on_contract_id"
   end
 
   create_table "users", force: :cascade do |t|

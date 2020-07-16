@@ -194,6 +194,8 @@ module API
 
             contract.arbitrators = arbitrators;
             contract.save!
+
+
             
             present contract.id
           end

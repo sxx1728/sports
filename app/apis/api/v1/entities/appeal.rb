@@ -12,6 +12,9 @@ module API
             Image.find(img).file.url
           }
         end
+        expose :chain_daa do |m,o|
+          "appeal_id:#{m.id}, user_id:#{m.user.id}, cause:#{m.cause}"
+        end
       end
     end
   end

@@ -8,6 +8,7 @@ class Contract < ApplicationRecord
   has_one :appeal
   has_one :reply
   has_many :transactions
+  belongs_to :coin
 
   has_many :arbitrament, class_name: "ContractsUsers"
 
@@ -64,6 +65,61 @@ class Contract < ApplicationRecord
     end
  
   end
+
+  def deploy(factory)
+    if self.tx_id.nil?
+      ret = factory.transact_and_wait.new_rent_contract(ENV["RENT_CONFIG_ADDRESS"])
+      if ret.mined
+        self.update!(tx_id: ret.id)
+      else
+        Rails.logger.error(result)
+        return
+      end
+    end
+
+    unless  self.is_on_chain
+      contract = self.build_chainly_contract
+      contract.transact_and_wait.init(
+        self.id.to_s,
+        self.eth.wallet_address,
+        self.owner.address
+
+
+
+    end
+
+
+
+
+     
+  end
+  
+
+  def self.build_contract_factory
+
+    abi = File.read(Rails.root.join(ENV["RENT_FACTORY_ABI"]).to_s)
+    contract = Ethereum::Contract.create(client: $client, name: "contractfactory", address: ENV["RENT_FACTORY_ADDRESS"], abi: abi)
+    key = Eth::Key.new(priv:ENV["RENT_ADMIN_KEY"])
+
+    contract.key = key
+
+    contract
+  end
+
+  def build_chainly_contract
+
+    abi = File.read(Rails.root.join(ENV["RENT_CONTRACT_ABI"]).to_s)
+    contract = Ethereum::Contract.create(client: $client, name: "contract", address: self.tx_id,  abi: abi)
+
+
+
+    key = Eth::Key.new(priv:ENV["RENT_ADMIN_KEY"])
+    contract.key = key
+    contract
+  end
+
+
+
 
   def log_transaction_renter_appeal
     content = "房客(#{self.renter.nickanme} ID: #{self.renter.id}), 发起申诉 "

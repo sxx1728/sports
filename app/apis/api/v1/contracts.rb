@@ -146,17 +146,23 @@ module API
           post do
             promoter = User.from_token params[:token]
             app_error('无效Token', 401) if promoter.nil?
+            app_error('中介钱包地址不能为空 ') if promoter.eth_wallet_address.nil?
 
             renter = Renter::User.find(params[:renter_id]) rescue nil
             app_error('无效房客ID') if renter.nil?
+            app_error('租客钱包地址不能为空 ') if renter.eth_wallet_address.nil?
 
             owner = Owner::User.find(params[:owner_id]) rescue nil
             app_error('无效房东ID') if owner.nil?
+            app_error('房东钱包地址不能为空 ') if owner.eth_wallet_address.nil?
 
 
-            renter = Renter::User.find(params[:renter_id]) rescue nil
             room = params[:room]
             trans = params[:trans]
+
+            currency = Owner::User.where(name: params[:currency]) rescue nil
+            app_error('无效币种名称') if currency.nil?
+
 
             arbitrators = Arbitrator::User.where(id: params[:arbitrators])
             app_error('无效仲裁ID, 最少5人') unless arbitrators.size == 5

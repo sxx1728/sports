@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_16_142225) do
+ActiveRecord::Schema.define(version: 2020_07_18_052815) do
 
   create_table "admins", force: :cascade do |t|
     t.string "email", limit: 128, default: "", null: false
@@ -89,14 +89,6 @@ ActiveRecord::Schema.define(version: 2020_07_16_142225) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
-  create_table "coins", force: :cascade do |t|
-    t.string "name", limit: 32, default: "", null: false
-    t.string "addr", limit: 512, default: "", null: false
-    t.integer "decimals", default: 18, null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-  end
-
   create_table "contracts", force: :cascade do |t|
     t.integer "renter_id"
     t.integer "owner_id"
@@ -128,6 +120,9 @@ ActiveRecord::Schema.define(version: 2020_07_16_142225) do
     t.date "trans_end_on"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "tx_id"
+    t.boolean "is_on_chain", default: false
+    t.integer "currency_id"
     t.index ["owner_id"], name: "index_contracts_on_owner_id"
     t.index ["promoter_id"], name: "index_contracts_on_promoter_id"
     t.index ["renter_id"], name: "index_contracts_on_renter_id"
@@ -144,6 +139,14 @@ ActiveRecord::Schema.define(version: 2020_07_16_142225) do
     t.boolean "done", default: false
     t.index ["contract_id"], name: "index_contracts_users_on_contract_id"
     t.index ["user_id"], name: "index_contracts_users_on_user_id"
+  end
+
+  create_table "currencies", force: :cascade do |t|
+    t.string "name", limit: 32, default: "", null: false
+    t.string "addr", limit: 512, default: "", null: false
+    t.integer "decimals", default: 18, null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "images", force: :cascade do |t|

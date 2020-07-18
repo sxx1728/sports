@@ -6,11 +6,11 @@ class Contract < ApplicationRecord
   belongs_to :owner, class_name: "Owner::User"
   belongs_to :promoter, class_name: "Promoter::User"
   has_and_belongs_to_many :arbitrators, class_name: "Arbitrator::User"
+  belongs_to :currency
   has_many :bills
   has_one :appeal
   has_one :reply
   has_many :transactions
-  belongs_to :currency
 
   has_many :arbitrament, class_name: "ContractsUsers"
 
@@ -70,23 +70,32 @@ class Contract < ApplicationRecord
 
   def deploy(factory)
     if self.chain_address.nil?
-      #ret = factory.transact_and_wait.new_rent_contract(ENV["RENT_CONFIG_ADDRESS"])
-      #if ret.mined
-      #else
-        #return
-      #end
+      ret = factory.transact_and_wait.new_rent_contract(ENV["RENT_CONFIG_ADDRESS"])
+      if ret.mined
+        tx_id = ret.id
+      else
+        Rails.logger.error("new_rent_contract failed") 
+        return
+      end
 
       event_abi = factory.abi.find {|a| a['name'] == 'RentContractCreated'}
-      tx_id = 0xc602a8b3b8145f633d98fe514466719bf9136d19931ddd86e8c0ab0d7246817d
+      event_inputs = event_abi['inputs'].map {|i| OpenStruct.new(i)}
+
       transaction = $eth_client.eth_get_transaction_receipt(tx_id)
 
-      filter_id = factory.new_filter.rent_contract_created({
-      })
+      data = transaction['result']['logs'][0]['data'] rescue nil
+      unless data.present?
+        Rails.logger.error("Get transaction data failed: #{transaction}") 
+        return
+      end
 
-      events = factory.get_filter_logs.rent_contract_created(filter_id)
-      binding.pry
-      
-      self.update!(chain_address: ret.id)
+      args = $eth_decoder.decode_arguments(event_inputs, data)
+      unless args.present? and args.size() == 2
+        Rails.logger.error("Decode transaction data failed: #{transaction}") 
+        return
+      end
+
+      self.update!(chain_address: args[0])
     end
 
     unless self.is_on_chain
@@ -107,7 +116,6 @@ class Contract < ApplicationRecord
         self.update!(is_on_chain: true)
       else
         Rails.logger.error(result)
-        return
       end
  
     end

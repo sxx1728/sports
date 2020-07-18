@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_18_074653) do
+ActiveRecord::Schema.define(version: 2020_07_18_132636) do
 
   create_table "admins", force: :cascade do |t|
     t.string "email", limit: 128, default: "", null: false
@@ -109,7 +109,6 @@ ActiveRecord::Schema.define(version: 2020_07_18_074653) do
     t.decimal "trans_monthly_price"
     t.decimal "trans_pledge_amount"
     t.string "trans_amount_pledge"
-    t.string "trans_payment_type"
     t.string "trans_coupon_code"
     t.string "trans_coupon_rate"
     t.decimal "trans_agency_fee_rate_origin"
@@ -120,9 +119,10 @@ ActiveRecord::Schema.define(version: 2020_07_18_074653) do
     t.date "trans_end_on"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.string "tx_id"
+    t.string "chain_address"
     t.boolean "is_on_chain", default: false
     t.integer "currency_id"
+    t.decimal "trans_pay_amount"
     t.index ["owner_id"], name: "index_contracts_on_owner_id"
     t.index ["promoter_id"], name: "index_contracts_on_promoter_id"
     t.index ["renter_id"], name: "index_contracts_on_renter_id"

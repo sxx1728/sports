@@ -132,12 +132,11 @@ module API
               requires :no, type: String, desc: "租赁协议编号"
               requires :currency, type: String, desc: "交易币种[ETH]"
               requires :monthly_price, type: Float, desc: "月房租"
-              requires :pledge_amount, type: Float, desc: "抵押金额"
-              requires :payment_type, type: String, desc: "支付模式[pleage1pay3, pleage1pay1]"
-              requires :coupon_code, type: String, desc: "优惠码"
-              requires :agency_fee_rate, type: Float, desc: "代理费率"
+              requires :pledge_amount, type: Float, desc: "抵押几个月"
+              requires :pay_amount, type: Float, desc: "一次支付几个月"
+              optional :coupon_code, type: String, desc: "优惠码"
               requires :agency_fee_by, type: String, desc: "中介费谁支付"
-              requires :period, type: Integer, desc: "协议周期月数"
+              requires :period, type: Integer, desc: "租赁总月数, 必须是支付每次支付月数的整数倍"
               requires :begin_on, type: Date, desc: "起租日"
               requires :end_on, type: Date, desc: "结束日"
             end
@@ -160,13 +159,15 @@ module API
             room = params[:room]
             trans = params[:trans]
 
-            currency = Owner::User.where(name: params[:currency]) rescue nil
+            currency = Currency.where(name: params[:currency]).first rescue nil
             app_error('无效币种名称') if currency.nil?
 
 
             arbitrators = Arbitrator::User.where(id: params[:arbitrators])
             app_error('无效仲裁ID, 最少5人') unless arbitrators.size == 5
-            app_error('仲裁人没有设置钱包地址, 无法参与仲裁') if arbitrators.(eth_wallet_address: nil).any?
+            app_error('仲裁人没有设置钱包地址, 无法参与仲裁') if arbitrators.where(eth_wallet_address: nil).any?
+
+            app_error('租赁总月数不能被单次付费整除') unless trans[:period] % trans[:pay_amount] < 0.00001
 
             room = params[:room]
             trans = params[:trans]
@@ -183,17 +184,15 @@ module API
                                        room_is_pledged: room[:is_pledged],
 
                                        trans_no: trans[:no],
-                                       trans_currency: trans[:currency],
                                        trans_monthly_price: trans[:monthly_price],
                                        trans_pledge_amount: trans[:pledge_amount],
-                                       trans_payment_type: trans[:payment_type],
+                                       trans_pay_amount: trans[:pay_amount],
                                        trans_coupon_code: trans[:coupon_code],
                                        trans_agency_fee_by: trans[:agency_fee_by],
                                        trans_period: trans[:period],
                                        trans_begin_on: trans[:begin_on],
                                        trans_end_on: trans[:end_on])
 
-            
             if trans[:coupon_code].present?
               coupon = Coupon.where(code: trans[:coupon_code]).first
               app_error('中介费优惠券无效') if coupon.nil?
@@ -209,6 +208,8 @@ module API
             contract.promoter = promoter;
 
             contract.arbitrators = arbitrators;
+            contract.currency = currency;
+
             contract.save!
 
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_18_052815) do
+ActiveRecord::Schema.define(version: 2020_07_18_074653) do
 
   create_table "admins", force: :cascade do |t|
     t.string "email", limit: 128, default: "", null: false
@@ -139,6 +139,18 @@ ActiveRecord::Schema.define(version: 2020_07_18_052815) do
     t.boolean "done", default: false
     t.index ["contract_id"], name: "index_contracts_users_on_contract_id"
     t.index ["user_id"], name: "index_contracts_users_on_user_id"
+  end
+
+  create_table "coupons", force: :cascade do |t|
+    t.string "code"
+    t.integer "contract_id"
+    t.integer "user_id"
+    t.decimal "coupon_rate"
+    t.boolean "is_used"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["contract_id"], name: "index_coupons_on_contract_id"
+    t.index ["user_id"], name: "index_coupons_on_user_id"
   end
 
   create_table "currencies", force: :cascade do |t|

@@ -1,3 +1,5 @@
+require 'ostruct'
+
 class Contract < ApplicationRecord
 
   belongs_to :renter, class_name: "Renter::User"
@@ -8,7 +10,7 @@ class Contract < ApplicationRecord
   has_one :appeal
   has_one :reply
   has_many :transactions
-  belongs_to :coin
+  belongs_to :currency
 
   has_many :arbitrament, class_name: "ContractsUsers"
 
@@ -67,25 +69,47 @@ class Contract < ApplicationRecord
   end
 
   def deploy(factory)
-    if self.tx_id.nil?
-      ret = factory.transact_and_wait.new_rent_contract(ENV["RENT_CONFIG_ADDRESS"])
+    if self.chain_address.nil?
+      #ret = factory.transact_and_wait.new_rent_contract(ENV["RENT_CONFIG_ADDRESS"])
+      #if ret.mined
+      #else
+        #return
+      #end
+
+      event_abi = factory.abi.find {|a| a['name'] == 'RentContractCreated'}
+      tx_id = 0xc602a8b3b8145f633d98fe514466719bf9136d19931ddd86e8c0ab0d7246817d
+      transaction = $eth_client.eth_get_transaction_receipt(tx_id)
+
+      filter_id = factory.new_filter.rent_contract_created({
+      })
+
+      events = factory.get_filter_logs.rent_contract_created(filter_id)
+      binding.pry
+      
+      self.update!(chain_address: ret.id)
+    end
+
+    unless self.is_on_chain
+      contract = self.build_chainly_contract
+      ret = contract.transact_and_wait.init(
+        self.id.to_s,
+        self.owner.eth_wallet_address,
+        self.renter.eth_wallet_address,
+        self.promoter.eth_wallet_address,
+        self.currency.addr,
+        (self.trans_monthly_price * (10 ** self.currency.decimals)).to_i,
+        (self.trans_end_on - self.trans_begin_on).to_i,
+        self.trans_period, #fix me
+        self.arbitrators.map(&:eth_wallet_address))
+
+      Rails.logger.error(ret)
       if ret.mined
-        self.update!(tx_id: ret.id)
+        self.update!(is_on_chain: true)
       else
         Rails.logger.error(result)
         return
       end
-    end
-
-    unless  self.is_on_chain
-      contract = self.build_chainly_contract
-      contract.transact_and_wait.init(
-        self.id.to_s,
-        self.eth.wallet_address,
-        self.owner.address
-
-
-
+ 
     end
 
 
@@ -98,7 +122,7 @@ class Contract < ApplicationRecord
   def self.build_contract_factory
 
     abi = File.read(Rails.root.join(ENV["RENT_FACTORY_ABI"]).to_s)
-    contract = Ethereum::Contract.create(client: $client, name: "contractfactory", address: ENV["RENT_FACTORY_ADDRESS"], abi: abi)
+    contract = Ethereum::Contract.create(client: $eth_client, name: "contractfactory", address: ENV["RENT_FACTORY_ADDRESS"], abi: abi)
     key = Eth::Key.new(priv:ENV["RENT_ADMIN_KEY"])
 
     contract.key = key
@@ -109,9 +133,7 @@ class Contract < ApplicationRecord
   def build_chainly_contract
 
     abi = File.read(Rails.root.join(ENV["RENT_CONTRACT_ABI"]).to_s)
-    contract = Ethereum::Contract.create(client: $client, name: "contract", address: self.tx_id,  abi: abi)
-
-
+    contract = Ethereum::Contract.create(client: $eth_client, name: "contract", address: self.chain_address,  abi: abi)
 
     key = Eth::Key.new(priv:ENV["RENT_ADMIN_KEY"])
     contract.key = key

@@ -5,6 +5,25 @@
       "type": "constructor"
     },
     {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "rentContract",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "creator",
+          "type": "address"
+        }
+      ],
+      "name": "RentContractCreated",
+      "type": "event"
+    },
+    {
       "inputs": [
         {
           "internalType": "contract ChainlyRentConfig",
@@ -24,5 +43,4 @@
       "type": "function"
     }
   ]
-
 

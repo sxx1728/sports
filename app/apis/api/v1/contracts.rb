@@ -166,6 +166,7 @@ module API
 
             arbitrators = Arbitrator::User.where(id: params[:arbitrators])
             app_error('无效仲裁ID, 最少5人') unless arbitrators.size == 5
+            app_error('仲裁人没有设置钱包地址, 无法参与仲裁') if arbitrators.(eth_wallet_address: nil).any?
 
             room = params[:room]
             trans = params[:trans]
@@ -187,12 +188,21 @@ module API
                                        trans_pledge_amount: trans[:pledge_amount],
                                        trans_payment_type: trans[:payment_type],
                                        trans_coupon_code: trans[:coupon_code],
-                                       trans_agency_fee_rate: trans[:agent_fee_rate],
-                                       trans_agency_fee_by: trans[:agent_fee_by],
+                                       trans_agency_fee_by: trans[:agency_fee_by],
                                        trans_period: trans[:period],
                                        trans_begin_on: trans[:begin_on],
                                        trans_end_on: trans[:end_on])
 
+            
+            if trans[:coupon_code].present?
+              coupon = Coupon.where(code: trans[:coupon_code]).first
+              app_error('中介费优惠券无效') if coupon.nil?
+              contract.trans_agency_fee_rate_origin = 0.025;
+              contract.trans_agency_fee_rate = contract.trans_agency_fee_rate_origin - coupon.coupon_rate;
+            else
+              contract.trans_agency_fee_rate_origin = 0.025;
+              contract.trans_agency_fee_rate = contract.trans_agency_fee_rate_origin;
+            end
 
             contract.renter = renter;
             contract.owner = owner;

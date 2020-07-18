@@ -16,6 +16,13 @@ module API
         expose :room_capacity_max
         expose :room_is_pledged
 
+        expose :room_promoter_id do |m,o|
+          m.promoter.id
+        end
+        expose :room_promoter_name do |m,o|
+          m.promoter.kyc.name rescue nil
+        end
+ 
         expose :room_owner_id do |m,o|
           m.owner.id
         end
@@ -30,6 +37,7 @@ module API
         end
 
         expose :trans_currency
+        expose :trans_payment_type
         expose :trans_monthly_price
         expose :trans_amount_pledge
         expose :trans_coupon_code

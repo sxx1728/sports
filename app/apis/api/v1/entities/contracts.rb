@@ -10,7 +10,8 @@ module API
           m.state_desc o[:user]
         end
         expose :trans_no
-        expose :trans_payment_type
+        expose :trans_pay_amount
+        expose :trans_pledge_amount
         expose :trans_monthly_price
         expose :trans_currency
         expose :trans_begin_on

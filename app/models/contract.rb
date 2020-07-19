@@ -117,7 +117,6 @@ class Contract < ApplicationRecord
 
     unless self.is_on_chain
       contract = self.build_chainly_contract
-      binding.pry
       ret = contract.transact_and_wait.init(
         self.id.to_s,
         self.owner.eth_wallet_address,

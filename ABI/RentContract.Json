@@ -34,6 +34,25 @@
       "inputs": [
         {
           "indexed": false,
+          "internalType": "string",
+          "name": "txOrderId",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "name": "ContractClosed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
           "internalType": "address",
           "name": "rentConfig",
           "type": "address"
@@ -64,7 +83,7 @@
           "type": "address"
         }
       ],
-      "name": "Paied",
+      "name": "Paid",
       "type": "event"
     },
     {
@@ -89,7 +108,7 @@
           "type": "address"
         }
       ],
-      "name": "PlatformFeePaied",
+      "name": "PlatformFeePaid",
       "type": "event"
     },
     {
@@ -114,7 +133,7 @@
           "type": "address"
         }
       ],
-      "name": "PromoterFeePaied",
+      "name": "PromoterFeePaid",
       "type": "event"
     },
     {
@@ -171,6 +190,31 @@
         }
       ],
       "name": "RentFeeReleased",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "tenant",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "tokenAddr",
+          "type": "address"
+        }
+      ],
+      "name": "RentPledgeReleased",
       "type": "event"
     },
     {
@@ -233,9 +277,9 @@
       "name": "endDate",
       "outputs": [
         {
-          "internalType": "uint256",
+          "internalType": "string",
           "name": "",
-          "type": "uint256"
+          "type": "string"
         }
       ],
       "stateMutability": "view",
@@ -308,17 +352,38 @@
     },
     {
       "inputs": [],
+      "name": "payAmount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "payPeriod",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
       "name": "payStyle",
       "outputs": [
         {
-          "internalType": "uint8",
-          "name": "payMonthNum",
-          "type": "uint8"
-        },
-        {
-          "internalType": "uint8",
-          "name": "depositMonthNum",
-          "type": "uint8"
+          "internalType": "string",
+          "name": "",
+          "type": "string"
         }
       ],
       "stateMutability": "view",
@@ -365,6 +430,19 @@
     },
     {
       "inputs": [],
+      "name": "pledgeAmount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
       "name": "promoter",
       "outputs": [
         {
@@ -378,7 +456,7 @@
     },
     {
       "inputs": [],
-      "name": "promoterFeeRate",
+      "name": "promoterFee",
       "outputs": [
         {
           "internalType": "uint256",
@@ -446,9 +524,9 @@
       "name": "startDate",
       "outputs": [
         {
-          "internalType": "uint256",
+          "internalType": "string",
           "name": "",
-          "type": "uint256"
+          "type": "string"
         }
       ],
       "stateMutability": "view",
@@ -522,18 +600,43 @@
         },
         {
           "internalType": "uint256",
-          "name": "_monthlyRentFee",
+          "name": "_payAmount",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "_days",
+          "name": "_payPeriod",
           "type": "uint256"
         },
         {
-          "internalType": "uint8",
-          "name": "_payPeriod",
-          "type": "uint8"
+          "internalType": "uint256",
+          "name": "_pledgeAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_promoterFeeAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_monthlyRentFee",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "_startDate",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_endDate",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_payStyle",
+          "type": "string"
         },
         {
           "internalType": "address[]",
@@ -569,7 +672,7 @@
         },
         {
           "internalType": "uint256",
-          "name": "promoterFee",
+          "name": "_promoterFee",
           "type": "uint256"
         }
       ],
@@ -579,6 +682,20 @@
     {
       "inputs": [],
       "name": "releaseRentFee",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "releaseRentPledge",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "closeContract",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

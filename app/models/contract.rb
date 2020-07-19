@@ -117,15 +117,21 @@ class Contract < ApplicationRecord
 
     unless self.is_on_chain
       contract = self.build_chainly_contract
+      binding.pry
       ret = contract.transact_and_wait.init(
         self.id.to_s,
         self.owner.eth_wallet_address,
         self.renter.eth_wallet_address,
         self.promoter.eth_wallet_address,
         self.currency.addr,
+        (self.trans_monthly_price * (10 ** self.currency.decimals) * self.trans_pay_amount).to_i,
+        (self.trans_period / self.trans_pay_amount).to_i,
+        (self.trans_monthly_price * (10 ** self.currency.decimals) * self.trans_pledge_amount).to_i,
+        (self.trans_monthly_price * (10 ** self.currency.decimals) * self.trans_agency_fee_rate).to_i,
         (self.trans_monthly_price * (10 ** self.currency.decimals)).to_i,
-        (self.trans_end_on - self.trans_begin_on).to_i,
-        self.trans_period, #fix me
+        self.trans_begin_on.to_s,
+        self.trans_end_on.to_s,
+        "押#{self.trans_pledge_amount}付#{self.trans_pay_amount}",
         self.arbitrators.map(&:eth_wallet_address))
 
       Rails.logger.error(ret)

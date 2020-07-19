@@ -27,6 +27,7 @@ module API
       mount API::V1::Sessions
       mount API::V1::Contracts
       mount API::V1::Arbitraments
+      mount API::V1::Currencies
 
       namespace :doc do
         

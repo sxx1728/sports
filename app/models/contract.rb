@@ -29,10 +29,18 @@ class Contract < ApplicationRecord
     state :canceled
 
     event :sign do
-      transitions from: :unsigned, to: :renter_signed, guard: Proc.new {|user| self.renter == user }
-      transitions from: :unsigned, to: :owner_signed, guard: Proc.new {|user| self.owner == user }
-      transitions from: :renter_signed, to: :running, guard: Proc.new {|user| self.owner == user }
-      transitions from: :owner_signed, to: :running, guard: Proc.new {|user| self.renter == user }
+      transitions from: :unsigned, to: :renter_signed, guard: Proc.new {|user| 
+        self.renter == user
+      }
+      transitions from: :unsigned, to: :owner_signed, guard: Proc.new {|user|
+        self.owner == user 
+      }
+      transitions from: :renter_signed, to: :running, guard: Proc.new {|user| 
+        self.owner == user 
+      }
+      transitions from: :owner_signed, to: :running, guard: Proc.new {|user|
+        self.renter == user
+      }
     end
     event :reject do
       transitions from: [:unsigned, :renter_signed, :owner_signed], to: :rejected
@@ -68,6 +76,14 @@ class Contract < ApplicationRecord
  
   end
 
+  def create_first_bill()
+    bill = self.bills.build(item: "房租x#{self.trans_pay_amount} + 押金x#{self.trans_pledge_amount} + 中介费x#{self.trans_agency_fee_rate}",
+                                                              amount: self.trans_monthly_price * (self.trans_pay_amount + self.trans_pledge_amount + self.trans_agency_fee_rate),
+                                                              paid: false)
+    bill.save!
+  end
+
+  
   def deploy(factory)
     if self.chain_address.nil?
       ret = factory.transact_and_wait.new_rent_contract(ENV["RENT_CONFIG_ADDRESS"])
@@ -96,6 +112,7 @@ class Contract < ApplicationRecord
       end
 
       self.update!(chain_address: args[0])
+
     end
 
     unless self.is_on_chain
@@ -120,10 +137,6 @@ class Contract < ApplicationRecord
  
     end
 
-
-
-
-     
   end
   
 

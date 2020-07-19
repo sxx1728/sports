@@ -88,7 +88,7 @@ module API
             rescue AASM::InvalidTransition => e
               app_error(e.message) 
             end
-   
+
             present 'succeed'
           end
 
@@ -159,7 +159,7 @@ module API
             room = params[:room]
             trans = params[:trans]
 
-            currency = Currency.where(name: params[:currency]).first rescue nil
+            currency = Currency.where(name: trans[:currency]).first rescue nil
             app_error('无效币种名称') if currency.nil?
 
 

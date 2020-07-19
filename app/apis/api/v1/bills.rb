@@ -18,7 +18,7 @@ module API
     
             bills = contract.bills
 
-            present bills, with: API::V1::Entities::Bills
+            present bills, with: API::V1::Entities::Bills, contract: contract, user: user
           end
 
         end

@@ -37,9 +37,9 @@ module API
         end
 
         expose :trans_currency
-        expose :trans_payment_type
+        expose :trans_pay_amount
+        expose :trans_pledge_amount
         expose :trans_monthly_price
-        expose :trans_amount_pledge
         expose :trans_coupon_code
         expose :trans_coupon_rate
         expose :trans_agency_fee_rate
@@ -54,6 +54,7 @@ module API
         end
 
         expose :arbitrators, using: API::V1::Entities::Arbitrators
+        expose :chain_address
       end
     end
   end

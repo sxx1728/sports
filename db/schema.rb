@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_18_132636) do
+ActiveRecord::Schema.define(version: 2020_07_19_083031) do
 
   create_table "admins", force: :cascade do |t|
     t.string "email", limit: 128, default: "", null: false
@@ -78,6 +78,8 @@ ActiveRecord::Schema.define(version: 2020_07_18_132636) do
     t.string "tx_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.boolean "paied"
+    t.boolean "paid"
     t.index ["contract_id"], name: "index_bills_on_contract_id"
   end
 

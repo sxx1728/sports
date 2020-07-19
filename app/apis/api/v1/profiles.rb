@@ -17,9 +17,9 @@ module API
           desc '修改用户信息'
           params do
             requires :token, type: String, desc: "user token"
-            requires :nick_name, type: String, desc: "user nick name"
-            requires :desc, type: String, desc: "介绍"
-            requires :eth_wallet_address, type: String, desc: "eth 钱包地址"
+            optional :nick_name, type: String, desc: "user nick name"
+            optional :desc, type: String, desc: "介绍"
+            optional :eth_wallet_address, type: String, desc: "eth 钱包地址"
           end
           put do
             user = User.from_token params[:token]
@@ -32,7 +32,7 @@ module API
             if params[:eth_wallet_address].present?
               app_error('无效eth_wallet_address长度') unless params[:eth_wallet_address].length == 42
               app_error('无效eth_wallet_address，前缀0x') unless params[:eth_wallet_address][0..1] == '0x'
-              app_error('无法修改ETH钱包地址') if user.eth_wallet_address.present?
+              #app_error('无法修改ETH钱包地址') if user.eth_wallet_address.present?
               user.update!(eth_wallet_address: params[:eth_wallet_address])
             end
 

@@ -50,7 +50,7 @@ module API
             user = User.where(phone: params[:phone]).first
             app_error('用户未注册') if user.nil?
 
-            user.update!(password_md5: parmas[:password_md5])
+            user.update!(password_md5: params[:password_md5])
 
             present 'succeed'
           end

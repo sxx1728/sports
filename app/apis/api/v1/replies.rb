@@ -28,7 +28,7 @@ module API
             requires :token, type: String, desc: "user token"
             requires :contract_id, type: String, desc: "transaction code"
             requires :images, type: Array[Integer], coerce_with: ->(val) { 
-              val.split(/\D+/).map(&:to_i) 
+              val.split(/\D+/).select(&:present?).map(&:to_i) 
             },  desc: "答复图片"
             requires :reply, type: String, desc: "答复理由"
           end

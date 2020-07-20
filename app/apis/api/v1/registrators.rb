@@ -48,7 +48,7 @@ module API
             captcha.update(expire_at: DateTime.current)
 
             user = User.where(phone: params[:phone]).first
-            app_error('用户未注册') if use.nil?
+            app_error('用户未注册') if user.nil?
 
             user.update!(password_md5, parmas[:password_md5])
 

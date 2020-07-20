@@ -135,6 +135,7 @@ class Contract < ApplicationRecord
 
       Rails.logger.error(ret)
       if ret.mined
+        
         self.update!(is_on_chain: true)
       else
         Rails.logger.error(result)

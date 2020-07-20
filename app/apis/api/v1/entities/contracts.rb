@@ -13,7 +13,9 @@ module API
         expose :trans_pay_amount
         expose :trans_pledge_amount
         expose :trans_monthly_price
-        expose :trans_currency
+        expose :trans_currency do |m,o|
+          m.currency.name rescue nil
+        end
         expose :trans_begin_on
         expose :trans_end_on
         expose :room_district

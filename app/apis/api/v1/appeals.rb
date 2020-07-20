@@ -8,7 +8,7 @@ module API
             requires :token, type: String, desc: "user token"
             requires :contract_id, type: String, desc: "transaction code"
             requires :images, type: Array[Integer], coerce_with: ->(val) { 
-              val.split(/\D+/).map(&:to_i) 
+              val.split(/\D+/).select(&:present?).map(&:to_i) 
             },  desc: "申诉图片"
             requires :cause, type: String, desc: "申诉理由"
             requires :amount, type: Float, desc: "申诉金额"
@@ -36,7 +36,7 @@ module API
             rescue AASM::InvalidTransition => e
               app_error(e.message)
             end
-            contract.build_appeal(cause: params[:cause], amount: params[:amount], images: images, at: DateTime.current).save!
+            contract.build_appeal(cause: params[:cause], amount: params[:amount], images: images, at: DateTime.current, user: user).save!
 
             present contract.appeal, with: API::V1::Entities::Appeal
           end

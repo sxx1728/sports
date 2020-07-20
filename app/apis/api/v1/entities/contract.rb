@@ -6,6 +6,8 @@ module API
 
         expose :trans_no
 
+        expose :room_no
+        expose :room_usage
         expose :room_address
         expose :room_district
         expose :room_area

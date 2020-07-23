@@ -19,7 +19,7 @@ module API
         expose :room_is_pledged
 
         expose :room_promoter_id do |m,o|
-          m.promoter.id
+          m.promoter.id rescue nil
         end
         expose :room_promoter_name do |m,o|
           m.promoter.kyc.name rescue nil

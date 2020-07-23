@@ -4,7 +4,7 @@ class Contract < ApplicationRecord
 
   belongs_to :renter, class_name: "Renter::User"
   belongs_to :owner, class_name: "Owner::User"
-  belongs_to :promoter, class_name: "Promoter::User"
+  belongs_to :promoter, class_name: "Promoter::User", optional: true 
   has_and_belongs_to_many :arbitrators, class_name: "Arbitrator::User"
   belongs_to :currency
   has_many :bills

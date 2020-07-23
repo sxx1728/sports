@@ -144,6 +144,7 @@ module API
           post do
             promoter = User.from_token params[:token]
             app_error('无效Token', 401) if promoter.nil?
+            app_error('无权创建合同') unless ['Promoter::User', 'Owner::User'].include?(promoter.type)
             app_error('中介钱包地址不能为空 ') if promoter.eth_wallet_address.nil?
 
             renter = Renter::User.find(params[:renter_id]) rescue nil
@@ -154,6 +155,9 @@ module API
             app_error('无效房东ID') if owner.nil?
             app_error('房东钱包地址不能为空 ') if owner.eth_wallet_address.nil?
 
+            if owner == promoter
+                promoter = nil
+            end
 
             room = params[:room]
             trans = params[:trans]

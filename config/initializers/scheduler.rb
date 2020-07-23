@@ -8,7 +8,7 @@ s = Rufus::Scheduler.singleton
 
 contract_factory = Contract.build_contract_factory
 
-s.every('20h', overlap: false){
+s.every('20s', overlap: false){
   
   Contract.where(state: 'running').where(is_on_chain: false).each{ |contract|
     Rails.logger.info('Deploying')
@@ -18,7 +18,7 @@ s.every('20h', overlap: false){
 
 }
 
-s.every('30h', overlap: false){
+s.every('30s', overlap: false){
   
   Contract.where(state: 'running').where(is_on_chain: true).each{ |contract|
     

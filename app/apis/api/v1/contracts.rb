@@ -73,7 +73,6 @@ module API
             contract = Contract.find params[:id] rescue nil
             app_error('无效合同id', 'id') if contract.nil?
 
-
             begin
               case params[:action]
               when 'sign'

@@ -59,6 +59,7 @@ module API
 
         expose :arbitrators, using: API::V1::Entities::Arbitrators
         expose :chain_address
+        expose :trans_balance 
       end
     end
   end

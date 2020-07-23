@@ -19,6 +19,24 @@ module API
             present image.id
           end
 
+          desc '获得image'
+          params do
+            requires :token, type: String, desc: "user token"
+            requires :id, type: Integer, desc: "文件id"
+          end
+          get do
+            user = User.from_token params[:token]
+            app_error('无效Token', 401) if user.nil?
+
+            image = Image.find(params[:id]) rescue nil
+            app_error('无效id') if image.nil?
+
+            app_error('无权访问id') unless image.user == user
+
+            present image.file.url
+          end
+
+
         end
       end
     end

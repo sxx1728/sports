@@ -4,6 +4,7 @@ module API
       class Appeal < Grape::Entity
         include API::Helpers
 
+        expose :id
         expose :at
         expose :cause
         expose :amount

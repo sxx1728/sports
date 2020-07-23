@@ -76,6 +76,14 @@ class Contract < ApplicationRecord
  
   end
 
+  def trans_balance()
+
+    in_amount = self.bills.where(in_or_out: true).where(paid: true).sum(:amount)
+    out_amount = self.bills.where(in_or_out: false).where(paid: true).sum(:amount)
+    in_amount - out_amount
+  end
+
+
   def create_first_bill()
     bill = self.bills.build(item: "房租x#{self.trans_pay_amount} + 押金x#{self.trans_pledge_amount} + 中介费x#{self.trans_agency_fee_rate}",
                                                               amount: self.trans_monthly_price * (self.trans_pay_amount + self.trans_pledge_amount + self.trans_agency_fee_rate),

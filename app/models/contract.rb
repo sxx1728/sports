@@ -204,8 +204,8 @@ class Contract < ApplicationRecord
       else
         return 'none'
       end
-    when 'onwer_appealed'
-      if user.type == 'Renter::User' and 
+    when 'owner_appealed'
+      if user.type == 'Renter::User' 
         return 'appealed'
       elsif user.type == 'Owner::User'
         return 'appealing'

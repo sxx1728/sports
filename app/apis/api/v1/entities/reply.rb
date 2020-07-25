@@ -14,6 +14,9 @@ module API
         expose :chain_data do |m,o|
           "reply_id:#{m.id}, user_id:#{m.user.id}, cause:#{m.reply}"
         end
+        expose :user_type do |m,o|
+          m.user.type
+        end
       end
     end
   end

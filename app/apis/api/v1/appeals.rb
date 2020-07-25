@@ -48,7 +48,6 @@ module API
             requires :contract_id, type: String, desc: "transaction code"
           end
           get do
-            binding.pry
             user = User.from_token params[:token]
             app_error('无效Token', 401) if user.nil?
 

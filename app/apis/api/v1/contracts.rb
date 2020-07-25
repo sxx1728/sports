@@ -29,7 +29,11 @@ module API
 
             case params[:state]
             when 'all'
-              contracts = contracts
+              if user.type == 'Arbitrator::User'
+                contracts = contracts.where(state: ['arbitrating', 'arbitrated'])
+              else
+                contracts = contracts
+              end
             when 'running', 'broken', 'arbitrating', 'finished', 'canceled'
               contracts = contracts.where(state: params[:state])
             when 'unsigned'

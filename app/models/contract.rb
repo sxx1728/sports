@@ -25,6 +25,7 @@ class Contract < ApplicationRecord
     state :renter_appealed
     state :owner_appealed
     state :arbitrating
+    state :arbitrated
     state :finished
     state :canceled
 
@@ -73,6 +74,10 @@ class Contract < ApplicationRecord
           self.renter == user
         }
     end
+    event :arbitrate do
+      transitions from: :arbitrating, to: :arbitrated
+    end
+ 
  
   end
 

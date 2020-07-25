@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_23_150842) do
+ActiveRecord::Schema.define(version: 2020_07_25_130148) do
 
   create_table "admins", force: :cascade do |t|
     t.string "email", limit: 128, default: "", null: false
@@ -100,7 +100,7 @@ ActiveRecord::Schema.define(version: 2020_07_23_150842) do
     t.string "room_district"
     t.decimal "room_area"
     t.string "room_no"
-    t.string "room_owner_name"
+    t.string "room_certificate_owner"
     t.string "room_usage"
     t.integer "room_capacity_min"
     t.integer "room_capacity_max"

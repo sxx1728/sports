@@ -12,7 +12,7 @@ module API
         expose :room_district
         expose :room_area
         expose :room_certificate
-
+        expose :room_certificate_owner
         expose :room_capacity_min
         expose :room_capacity_max
         expose :room_is_pledged

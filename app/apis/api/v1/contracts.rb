@@ -125,7 +125,7 @@ module API
               requires :area, type: Float, desc: "面积平方米"
               requires :certificate, type: String, desc: "房屋证明资料"
               requires :no, type: String, desc: "房屋证书号码"
-              requires :owner_name, type: String, desc: "房主姓名"
+              requires :certificate_owner, type: String, desc: "房主姓名"
               requires :usage, type: String, desc: "房子用途"
               requires :capacity_min, type: Integer, desc: "房子人数最少"
               requires :capacity_max, type: Integer, desc: "房子人数最多"
@@ -184,7 +184,7 @@ module API
                                        room_area: room[:area],
                                        room_certificate: room[:certificate],
                                        room_no: room[:no],
-                                       room_owner_name: room[:owner_name],
+                                       room_certificate_owner: room[:certificate_owner],
                                        room_usage: room[:usage],
                                        room_capacity_min: room[:capacity_min],
                                        room_capacity_max: room[:capacity_max],

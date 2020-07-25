@@ -181,7 +181,7 @@ module API
                                        room_certificate: room[:certificate],
                                        room_no: room[:no],
                                        room_owner_name: room[:owner_name],
-                                       room_usage: room[:owner_name],
+                                       room_usage: room[:usage],
                                        room_capacity_min: room[:capacity_min],
                                        room_capacity_max: room[:capacity_max],
                                        room_is_pledged: room[:is_pledged],

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_25_130148) do
+ActiveRecord::Schema.define(version: 2020_07_29_133800) do
 
   create_table "admins", force: :cascade do |t|
     t.string "email", limit: 128, default: "", null: false
@@ -67,6 +67,16 @@ ActiveRecord::Schema.define(version: 2020_07_25_130148) do
     t.string "images"
     t.integer "user_id"
     t.index ["contract_id"], name: "index_appeals_on_contract_id"
+  end
+
+  create_table "arbitrament_results", force: :cascade do |t|
+    t.integer "contract_id"
+    t.integer "owner_rate"
+    t.integer "renter_rate"
+    t.string "tx_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["contract_id"], name: "index_arbitrament_results_on_contract_id"
   end
 
   create_table "bills", force: :cascade do |t|

@@ -10,9 +10,10 @@ class Contract < ApplicationRecord
   has_many :bills
   has_one :appeal
   has_one :reply
+  has_one :arbitrament_result
   has_many :transactions
 
-  has_many :arbitrament, class_name: "ContractsUsers"
+  has_many :arbitraments, class_name: "::ContractsUser"
 
   include AASM
   aasm column: 'state' do

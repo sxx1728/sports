@@ -89,12 +89,86 @@ class Contract < ApplicationRecord
     in_amount - out_amount
   end
 
-
   def create_first_bill()
+    block_height = $client.eth_block_number rescue '0x'
     bill = self.bills.build(item: "房租x#{self.trans_pay_amount} + 押金x#{self.trans_pledge_amount} + 中介费x#{self.trans_agency_fee_rate}",
                                                               amount: self.trans_monthly_price * (self.trans_pay_amount + self.trans_pledge_amount + self.trans_agency_fee_rate),
-                                                              paid: false)
+                                                              paid: false, pay_cycle: 1, block_height: block_height)
     bill.save!
+  end
+
+
+
+  def scan_chain_bill()
+    
+    return unless self.is_on_chain
+    contract = self.build_chainly_contract
+    bill = self.bills.where(paid: false).order(:pay_cycle, :asc).first
+    return if bill.nil?
+
+    contract = self.build_chainly_contract
+
+    event_abi = contract.abi.find {|a| a['name'] == 'RentFeeReceived'}
+    event_inputs = event_abi['inputs'].map {|i| OpenStruct.new(i)}
+
+    filter_id = contract.new_filter.rent_fee_received({
+      from_block: bill.block_height || '0x0',
+      to_block: 'latest',
+      address: self.chain_address,
+      })
+    events = contract.get_filter_logs.rent_fee_received(filter_id)
+
+    events.each{ |event|
+      transaction_id = event[:transactionHash]
+      transaction = $eth_client.eth_get_transaction_receipt(transaction_id)
+
+      log = transaction['result']['logs'].detect{ |item|
+        item['topics'][0] == "0xaddf648b115305d494727dc7572346d723ba6e98ae2cf48a61f2015f974dff89"
+      }
+      data = log['data']
+      
+      args = $eth_decoder.decode_arguments(event_inputs, data)
+
+      pay_cycle = args[2]
+      next unless pay_cycle == bill.pay_cycle
+
+      paid_by = args[0]
+      currency = Currency.where("addr like '%#{args[3]}'").first
+      if currency.nil?
+        Rails.logger.error("Currency addr not found: #{args[3]}}")
+        next
+      end
+
+      if currency.name != self.trans_currency
+        Rails.logger.error("Currency name incorrect: #{currency.name}}")
+        next
+      end
+
+      amount = args[1].to_f / (10 ** currency.decimals)
+
+      if bill.amount > amount
+        Rails.logger.error("Paid amount incorrect")
+        next
+      end
+
+      binding.pry
+      bill.update!(paid: true, tx_id: log['transactionHash'])
+
+      left_amount = self.trans_period - (self.trans_pay_amount * pay_cycle)
+      pay_amount = [self.trans_pay_amount, left_amount].min
+
+      if pay_amount > 0
+        next_bill = self.bills.build(item: "房租x#{pay_amount}", 
+                                   amount: self.trans_monthly_price * pay_amount,
+                                   paid: false, pay_cycle: pay_cycle + 1, 
+                                   pay_at: DateTime.current,
+                                   block_height: log['blockNumber'])
+        next_bill.save!
+      end
+
+    }
+    
+    
   end
 
   

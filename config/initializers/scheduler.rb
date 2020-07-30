@@ -18,7 +18,7 @@ s.every('1h', overlap: false){
 
 }
 
-s.every('1h', overlap: false){
+s.every('20s', overlap: false){
   
   Contract.where(state: 'running').where(is_on_chain: true).each{ |contract|
     
@@ -26,6 +26,10 @@ s.every('1h', overlap: false){
     if bill_count == 0
       Rails.logger.info('First bill')
       contract.create_first_bill()
+    else
+      Rails.logger.info('Scan paid bill')
+      contract.scan_chain_bill()
+
     end
   }
 

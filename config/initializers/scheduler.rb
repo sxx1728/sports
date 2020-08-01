@@ -24,10 +24,10 @@ s.every('1m', overlap: false){
     
     bill_count = contract.bills.count
     if bill_count == 0
-      Rails.logger.info('First bill')
+      Rails.logger.error('First bill')
       contract.create_first_bill()
     else
-      Rails.logger.info('Scan paid bill')
+      Rails.logger.error('Scan paid bill')
       contract.scan_chain_bill()
 
     end

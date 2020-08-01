@@ -100,11 +100,17 @@ class Contract < ApplicationRecord
 
 
   def scan_chain_bill()
-    
-    return unless self.is_on_chain
+    unless self.is_on_chain
+      Rails.logger.error("contranct is not on_chain: #{self.id}}")
+      return 
+    end
     contract = self.build_chainly_contract
-    bill = self.bills.where(paid: false).order(:pay_cycle, :asc).first
-    return if bill.nil?
+    bill = self.bills.where(paid: false).order(pay_cycle: :asc).first
+
+    if bill.nil?
+      Rails.logger.error("bill is nil: #{self.id}}")
+      return 
+    end
 
     contract = self.build_chainly_contract
 
@@ -130,7 +136,10 @@ class Contract < ApplicationRecord
       args = $eth_decoder.decode_arguments(event_inputs, data)
 
       pay_cycle = args[2]
-      next unless pay_cycle == bill.pay_cycle
+      unless pay_cycle == bill.pay_cycle
+        Rails.logger.error("pay_cycle: #{pay_cycle}}", bill_cycle:#{bill.pay_cycle})
+        next
+      end
 
       paid_by = args[0]
       currency = Currency.where("addr like '%#{args[3]}'").first
@@ -139,7 +148,7 @@ class Contract < ApplicationRecord
         next
       end
 
-      if currency.name != self.trans_currency
+      if currency.name != self.currency.name
         Rails.logger.error("Currency name incorrect: #{currency.name}}")
         next
       end

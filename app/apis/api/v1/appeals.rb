@@ -21,6 +21,7 @@ module API
             contract = Contract.find params[:contract_id] rescue nil
             app_error('无效合同id') if contract.nil?
             app_error('无效合同状态') unless contract.running?
+            app_error('合同正在上链，请稍后重试') unless contract.is_on_chain
 
             app_error('申诉理由不能为空') unless params[:cause].present?
             app_error('申诉金额不能为空') unless params[:amount].present?
@@ -31,12 +32,17 @@ module API
               img_id
             }
  
-            begin
-              contract.launch_appeal!(user, params[:appeal_tx_id])
-            rescue AASM::InvalidTransition => e
-              app_error(e.message)
+            block_number = ($eth_client.eth_block_number)['result'] rescue '0x0'
+
+            if contract.appeal.nil?
+              appeal = contract.build_appeal(cause: params[:cause], amount: params[:amount],
+                                  images: images, at: DateTime.current, user: user, 
+                                  block_nuber: block_number).save!
+            else
+              appeal = contract.appeal
+              appeal.update!(cause: params[:cause], amount: params[:amount],
+                                  images: images, at: DateTime.current, user: user)
             end
-            contract.build_appeal(cause: params[:cause], amount: params[:amount], images: images, at: DateTime.current, user: user).save!
 
             present contract.appeal, with: API::V1::Entities::Appeal
           end

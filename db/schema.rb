@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_30_164019) do
+ActiveRecord::Schema.define(version: 2020_08_01_123457) do
 
   create_table "admins", force: :cascade do |t|
     t.string "email", limit: 128, default: "", null: false
@@ -66,6 +66,7 @@ ActiveRecord::Schema.define(version: 2020_07_30_164019) do
     t.datetime "updated_at", precision: 6, null: false
     t.string "images"
     t.integer "user_id"
+    t.string "block_number"
     t.index ["contract_id"], name: "index_appeals_on_contract_id"
   end
 
@@ -87,7 +88,6 @@ ActiveRecord::Schema.define(version: 2020_07_30_164019) do
     t.string "tx_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.boolean "paied"
     t.boolean "paid"
     t.boolean "in_or_out", default: true
     t.integer "pay_cycle"
@@ -99,6 +99,14 @@ ActiveRecord::Schema.define(version: 2020_07_30_164019) do
     t.string "phone", limit: 16
     t.string "captcha", limit: 8
     t.datetime "expire_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "coins", force: :cascade do |t|
+    t.string "name", limit: 32, default: "", null: false
+    t.string "addr", limit: 512, default: "", null: false
+    t.integer "decimals", default: 18, null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
@@ -124,8 +132,6 @@ ActiveRecord::Schema.define(version: 2020_07_30_164019) do
     t.decimal "trans_pledge_amount"
     t.string "trans_amount_pledge"
     t.string "trans_coupon_code"
-    t.string "trans_coupon_rate"
-    t.decimal "trans_agency_fee_rate_origin"
     t.decimal "trans_agency_fee_rate"
     t.string "trans_agency_fee_by"
     t.integer "trans_period"
@@ -133,6 +139,8 @@ ActiveRecord::Schema.define(version: 2020_07_30_164019) do
     t.date "trans_end_on"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "trans_coupon_rate"
+    t.decimal "trans_agency_fee_rate_origin"
     t.string "chain_address"
     t.boolean "is_on_chain", default: false
     t.integer "currency_id"
@@ -145,12 +153,12 @@ ActiveRecord::Schema.define(version: 2020_07_30_164019) do
   create_table "contracts_users", force: :cascade do |t|
     t.integer "contract_id"
     t.integer "user_id"
+    t.string "desc"
     t.integer "renter_rate"
     t.integer "owner_rate"
+    t.boolean "done", default: false
     t.string "images"
     t.datetime "at"
-    t.string "desc"
-    t.boolean "done", default: false
     t.index ["contract_id"], name: "index_contracts_users_on_contract_id"
     t.index ["user_id"], name: "index_contracts_users_on_user_id"
   end
@@ -203,6 +211,7 @@ ActiveRecord::Schema.define(version: 2020_07_30_164019) do
     t.string "images"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "block_number"
     t.index ["contract_id"], name: "index_replies_on_contract_id"
     t.index ["user_id"], name: "index_replies_on_user_id"
   end

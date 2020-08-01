@@ -53,12 +53,12 @@ class Contract < ApplicationRecord
     event :launch_appeal do
       transitions from: :running, 
         to: :renter_appealed, 
-        guard: Proc.new {|user, appeal_tx_id|
+        guard: Proc.new {|user|
           self.renter == user
         }
       transitions from: :running, 
         to: :owner_appealed, 
-        guard: Proc.new {|user, appeal_tx_id| 
+        guard: Proc.new {|user| 
           self.owner == user 
         } 
     end
@@ -90,21 +90,70 @@ class Contract < ApplicationRecord
   end
 
   def create_first_bill()
-    block_height = $client.eth_block_number rescue '0x'
+    block_height = ($eth_client.eth_block_number)['result'] rescue '0x0'
     bill = self.bills.build(item: "房租x#{self.trans_pay_amount} + 押金x#{self.trans_pledge_amount} + 中介费x#{self.trans_agency_fee_rate}",
                                                               amount: self.trans_monthly_price * (self.trans_pay_amount + self.trans_pledge_amount + self.trans_agency_fee_rate),
                                                               paid: false, pay_cycle: 1, block_height: block_height)
     bill.save!
   end
 
+  def scan_appeal(appeal)
+    unless self.is_on_chain
+      Rails.logger.error("contranct is not on_chain: #{self.id}}")
+      return 
+    end
+    contract = self.build_chainly_contract
 
+    event_abi = contract.abi.find {|a| a['name'] =='ArbitrationDataSubmitted'}
+    event_inputs = event_abi['inputs'].map {|i| OpenStruct.new(i)}
+
+    filter_id = contract.new_filter.arbitration_data_submitted({
+      from_block: '0x0',
+      to_block: 'latest',
+      address: self.chain_address,
+      })
+    events = contract.get_filter_logs.arbitration_data_submitted(filter_id)
+
+    events.each{ |event|
+      transaction_id = event[:transactionHash]
+      transaction = $eth_client.eth_get_transaction_receipt(transaction_id)
+
+      log = transaction['result']['logs'].detect{ |item|
+        item['topics'][0] == "0x44fa3c47a2ffb313e06ae135667481e7c75ae5cc163222ab899585a546cff81e"
+      }
+      data = log['data']
+      
+      args = $eth_decoder.decode_arguments(event_inputs, data)
+
+      user_address = args[0]
+      unless appeal.user.eth_wallet_address == user_address
+        Rails.logger.error("user_address: #{user_address}}, appeal_user_address:#{appeal.user.eth_wallet_address}")
+        next
+      end
+
+      begin
+        contract.launch_appeal!(appeal.user)
+        appeal.update!(tx_id: transaction_id)
+      rescue AASM::InvalidTransition => e
+        Rails.logger.error("appeal_id: #{ppeal.id}, launch appeal faield:#{e.message}")
+        next
+      end
+
+      transaction = self.transactions.build(at: DateTime.current, 
+                                            content: "#{appeal.user.desc} 发起仲裁#{bill.item}, 金额:#{amount} #{self.currency.name}", 
+                              tx_id: transaction_id)
+      transaction.save!
+
+    }
+  end
+   
 
   def scan_chain_bill()
     unless self.is_on_chain
       Rails.logger.error("contranct is not on_chain: #{self.id}}")
       return 
     end
-    contract = self.build_chainly_contract
+
     bill = self.bills.where(paid: false).order(pay_cycle: :asc).first
 
     if bill.nil?
@@ -160,10 +209,10 @@ class Contract < ApplicationRecord
         next
       end
 
-      bill.update!(paid: true, tx_id: log['transactionHash'])
+      bill.update!(paid: true, tx_id: transaction_id)
       transaction = self.transactions.build(at: DateTime.current, 
-                              content: "租户(ID:#{self.renter.id}) 支付#{bill.item}, 金额:#{amount} #{self.trans_currency}", 
-                              tx_id: log['transactionHash'])
+                                            content: "#{self.renter.desc} 支付#{bill.item}, 金额:#{amount} #{self.currency.name}", 
+                              tx_id: transaction_id)
       transaction.save!
 
 

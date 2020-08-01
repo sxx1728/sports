@@ -11,6 +11,24 @@ class User < ApplicationRecord
     TYPES.index(type.downcase).present?
   end
 
+  def desc
+    user_type = case self.type
+                when 'Renter::User'
+                  '租户'
+                 when 'Owner::User'
+                  '房东'
+                 when 'Promoter::User'
+                  '中介'
+                 when 'Arbitrator::User'
+                  '仲裁人'
+                 else
+                   '未知'
+                 end
+    
+    "#{user_type}(ID: #{self.id})"
+  end
+
+
   def token
     payload = {
       id: self.id

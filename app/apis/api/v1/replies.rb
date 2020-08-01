@@ -39,8 +39,13 @@ module API
             contract = Contract.find params[:contract_id] rescue nil
             app_error('无效合同id') if contract.nil?
 
+            app_error('无效合同状态') unless ((contract.renter_appealed? and user.type == 'Owner::User') or 
+                                          (contract.owner_appealed? and user.type == 'Renter::User'))
+
             if contract.reply.nil?
-              reply = contract.build_reply(reply: params[:reply], user: user, at: DateTime.current)
+              block_number = ($eth_client.eth_block_number)['result'] rescue '0x0'
+              reply = contract.build_reply(reply: params[:reply], user: user, at: DateTime.current, 
+                                          block_number: block_number)
             else
               reply = contract.reply
               reply.update(reply: params[:reply], user: user, at: DateTime.current)

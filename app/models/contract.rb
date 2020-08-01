@@ -151,12 +151,16 @@ class Contract < ApplicationRecord
         next
       end
 
-      binding.pry
       bill.update!(paid: true, tx_id: log['transactionHash'])
+      transaction = self.transactions.build(at: DateTime.current, 
+                              content: "租户(ID:#{self.renter.id}) 支付#{bill.item}, 金额:#{amount} #{self.trans_currency}", 
+                              tx_id: log['transactionHash'])
+      transaction.save!
+
 
       left_amount = self.trans_period - (self.trans_pay_amount * pay_cycle)
       pay_amount = [self.trans_pay_amount, left_amount].min
-
+      
       if pay_amount > 0
         next_bill = self.bills.build(item: "房租x#{pay_amount}", 
                                    amount: self.trans_monthly_price * pay_amount,

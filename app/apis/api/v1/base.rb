@@ -28,6 +28,7 @@ module API
       mount API::V1::Contracts
       mount API::V1::Arbitraments
       mount API::V1::Currencies
+      mount API::V1::Transactions
 
       namespace :doc do
         

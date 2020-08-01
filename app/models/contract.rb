@@ -137,7 +137,7 @@ class Contract < ApplicationRecord
 
       pay_cycle = args[2]
       unless pay_cycle == bill.pay_cycle
-        Rails.logger.error("pay_cycle: #{pay_cycle}}", bill_cycle:#{bill.pay_cycle})
+        Rails.logger.error("pay_cycle: #{pay_cycle}}, bill_cycle:#{bill.pay_cycle}")
         next
       end
 

@@ -41,23 +41,21 @@ module API
 
             app_error('无效合同状态') unless ((contract.renter_appealed? and user.type == 'Owner::User') or 
                                           (contract.owner_appealed? and user.type == 'Renter::User'))
-
-            if contract.reply.nil?
-              block_number = ($eth_client.eth_block_number)['result'] rescue '0x0'
-              reply = contract.build_reply(reply: params[:reply], user: user, at: DateTime.current, 
-                                          block_number: block_number)
-            else
-              reply = contract.reply
-              reply.update(reply: params[:reply], user: user, at: DateTime.current)
-            end
-
             images = params[:images].map{|img_id|
               img = Image.find(img_id) rescue nil
               app_error('图像ID无效') if img.nil? || img.user != user
               img_id
             }
-            reply.images = images
-            reply.save!
+
+            if contract.reply.nil?
+              block_number = ($eth_client.eth_block_number)['result'] rescue '0x0'
+              reply = contract.build_reply(reply: params[:reply], user: user, at: DateTime.current, 
+                                           block_number: block_number).save!
+            else
+              reply = contract.reply
+              reply.update!(reply: params[:reply], user: user, at: DateTime.current, images: images)
+            end
+
 
             begin
               contract.launch_reply!(user)

@@ -21,7 +21,7 @@ module API
             contract = Contract.find params[:contract_id] rescue nil
             app_error('无效合同id') if contract.nil?
             app_error('无效合同状态') unless contract.running?
-            app_error('合同正在上链，请稍后重试') unless contract.is_on_chain
+            app_error('合同正在上链，请稍后重试') unless contract.initialized
 
             app_error('申诉理由不能为空') unless params[:cause].present?
             app_error('申诉金额不能为空') unless params[:amount].present?

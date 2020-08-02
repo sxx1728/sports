@@ -98,7 +98,7 @@ class Contract < ApplicationRecord
   end
 
   def scan_appeal(appeal)
-    unless self.is_on_chain
+    unless self.initialized
       Rails.logger.error("contranct is not on_chain: #{self.id}}")
       return 
     end
@@ -149,7 +149,7 @@ class Contract < ApplicationRecord
    
 
   def scan_chain_bill()
-    unless self.is_on_chain
+    unless self.initialized
       Rails.logger.error("contranct is not on_chain: #{self.id}}")
       return 
     end
@@ -265,7 +265,7 @@ class Contract < ApplicationRecord
 
     end
 
-    unless self.is_on_chain
+    unless self.initialized
       contract = self.build_chainly_contract
       ret = contract.transact_and_wait.init(
         self.id.to_s,
@@ -280,13 +280,12 @@ class Contract < ApplicationRecord
         (self.trans_monthly_price * (10 ** self.currency.decimals)).to_i,
         self.trans_begin_on.to_s,
         self.trans_end_on.to_s,
-        "押#{self.trans_pledge_amount}付#{self.trans_pay_amount}",
+        "押#{self.trans_pledge_amount.to_i}付#{self.trans_pay_amount.to_i}",
         self.arbitrators.map(&:eth_wallet_address))
 
       Rails.logger.error(ret)
       if ret.mined
-        
-        self.update!(is_on_chain: true)
+        self.update!(initialized: true)
       else
         Rails.logger.error(result)
       end

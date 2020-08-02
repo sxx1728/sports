@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_01_123457) do
+ActiveRecord::Schema.define(version: 2020_08_02_015220) do
 
   create_table "admins", force: :cascade do |t|
     t.string "email", limit: 128, default: "", null: false
@@ -142,7 +142,7 @@ ActiveRecord::Schema.define(version: 2020_08_01_123457) do
     t.string "trans_coupon_rate"
     t.decimal "trans_agency_fee_rate_origin"
     t.string "chain_address"
-    t.boolean "is_on_chain", default: false
+    t.boolean "initialized", default: false
     t.integer "currency_id"
     t.decimal "trans_pay_amount"
     t.index ["owner_id"], name: "index_contracts_on_owner_id"

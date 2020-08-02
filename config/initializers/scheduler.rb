@@ -10,13 +10,13 @@ contract_factory = Contract.build_contract_factory
 
 s.every('20s', overlap: false){
 
-   Contract.where(state: 'running').where(is_on_chain: false).each{ |contract|
+   Contract.where(state: 'running').where(initialized: false).each{ |contract|
     Rails.logger.info('Deploying')
     contract.deploy(contract_factory)
   }
 
  
-  Contract.where(state: 'running').where(is_on_chain: true).each{ |contract|
+  Contract.where(state: 'running').where(initialized: true).each{ |contract|
     
     #scan bill
     bill_count = contract.bills.count

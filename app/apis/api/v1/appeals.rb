@@ -37,7 +37,7 @@ module API
             if contract.appeal.nil?
               appeal = contract.build_appeal(cause: params[:cause], amount: params[:amount],
                                   images: images, at: DateTime.current, user: user, 
-                                  block_nuber: block_number).save!
+                                  block_number: block_number).save!
             else
               appeal = contract.appeal
               appeal.update!(cause: params[:cause], amount: params[:amount],

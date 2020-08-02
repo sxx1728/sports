@@ -108,12 +108,13 @@ class Contract < ApplicationRecord
     event_inputs = event_abi['inputs'].map {|i| OpenStruct.new(i)}
 
     filter_id = contract.new_filter.arbitration_data_submitted({
-      from_block: '0x0',
+      from_block: appeal.block_number,
       to_block: 'latest',
       address: self.chain_address,
       })
     events = contract.get_filter_logs.arbitration_data_submitted(filter_id)
 
+    binding.pry
     events.each{ |event|
       transaction_id = event[:transactionHash]
       transaction = $eth_client.eth_get_transaction_receipt(transaction_id)

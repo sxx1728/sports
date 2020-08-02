@@ -33,8 +33,8 @@ s.every('20s', overlap: false){
   Appeal.where(tx_id: nil).each{ |appeal|
     next unless appeal.contract.running?
 
-    Rails.logger.error('casn appeal event')
-    contract.scan_appeal(appeal)
+    Rails.logger.error('Scan appeal event')
+    appeal.contract.scan_appeal(appeal)
   }
 
 }

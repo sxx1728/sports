@@ -37,6 +37,39 @@ s.every('20s', overlap: false){
     appeal.contract.scan_appeal(appeal)
   }
 
+  #scan appeals
+  Reply.where(tx_id: nil).each{ |appeal|
+    next unless appeal.contract.running?
+
+    Rails.logger.error('Scan reply event')
+    appeal.contract.scan_reply(reply)
+  }
+
+  #scan appeals
+  Reply.where(tx_id: nil).each{ |appeal|
+    next unless appeal.contract.running?
+
+    Rails.logger.error('Scan reply event')
+    appeal.contract.scan_reply(reply)
+  }
+
+  Contract.where(state: 'arbitrating').each{ |contract|
+
+    #scan arbitrament
+    arbitrating_count = contract.arbitraments.where(tx_id: nil).count
+    if arbitrating_count > 0
+      Rails.logger.error('scan arbitrating')
+      contract.scan_arbitrating()
+    end
+
+    arbitrated_count = contract.arbitraments.where.not(tx_id: nil).count
+    if arbitrating_count >= 3
+      Rails.logger.error('scan arbitrament result')
+      contract.scan_arbitrament_result()
+    end
+  }
+
+
 }
 
 

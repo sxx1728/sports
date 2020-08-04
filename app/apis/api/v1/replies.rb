@@ -63,7 +63,6 @@ module API
               app_error(e.message)
             end
 
-
             present contract.reply, with: API::V1::Entities::Reply
           end
 

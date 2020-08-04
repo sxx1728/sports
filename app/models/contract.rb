@@ -48,7 +48,7 @@ class Contract < ApplicationRecord
       transitions from: [:unsigned, :renter_signed, :owner_signed], to: :rejected
     end
     event :cancel do
-      transitions from: [:unsigned, :renter_signed, :owner_signed], to: :canceled, guard: Proc.new {|user| self.promoter == user }
+      transitions from: [:unsigned, :renter_signed, :owner_signed], to: :canceled, guard: Proc.new {|user| self.promoter == user || self.owner == user}
     end
     event :launch_appeal do
       transitions from: :running, 
@@ -97,6 +97,146 @@ class Contract < ApplicationRecord
     bill.save!
   end
 
+  def scan_arbitrament_result()
+    contract = self.build_chainly_contract
+
+    event_abi = contract.abi.find {|a| a['name'] =='ArbitrationResultGenerated'}
+    event_inputs = event_abi['inputs'].map {|i| OpenStruct.new(i)}
+
+    filter_id = contract.new_filter.arbitration_data_submitted({
+      from_block: '0x0',
+      to_block: 'latest',
+      address: self.chain_address,
+      })
+    events = contract.get_filter_logs.arbitration_result_generated(filter_id)
+
+    events.each{ |event|
+      transaction_id = event[:transactionHash]
+      transaction = $eth_client.eth_get_transaction_receipt(transaction_id)
+
+      log = transaction['result']['logs'].detect{ |item|
+        item['topics'][0] == "0xcb3e47cde7ae1301b800b024166f8350606b5ced55e601cbcfe585d73f78d2bb"
+      }
+      data = log['data']
+      
+      args = $eth_decoder.decode_arguments(event_inputs, data)
+
+      arbitrament_result = self.arbitrament_result
+
+      unless arbitrament_result.present?
+        arbitrament_result = self.build_arbitrament_result(owner_rate: args[0], renter_rate: args[1],
+                                                           tx_id: transaction_id)
+        arbitrament_result.save!
+
+        transaction = self.transactions.build(at: DateTime.current, 
+                                              content: "最终仲裁结果如下：房东:#{arbitrament_result.owner_rate}% #{arbitrament_result.owner_rate/100.0 * self.appeal.amount} #{self.currency.name}  ,房客#{arbitrament_result.renter_rate}% #{arbitrament_result/100.0 * self.appeal.amount} #{self.currency.name}", 
+                                tx_id: transaction_id)
+        transaction.save!
+
+        self.arbitrate!
+      else
+        Rails.logger.error("arbitrament inconsistent on chain: (#{args[1].to_i}, #{args[2].to_i}) vs (#{arbitrament.owner_rate}, #{arbitrament.renter_rate})")
+      end
+    }
+  end
+   
+  def scan_arbitrating()
+    contract = self.build_chainly_contract
+
+    event_abi = contract.abi.find {|a| a['name'] =='ArbitrationProposalSubmitted'}
+    event_inputs = event_abi['inputs'].map {|i| OpenStruct.new(i)}
+
+    filter_id = contract.new_filter.arbitration_data_submitted({
+      from_block: '0x0',
+      to_block: 'latest',
+      address: self.chain_address,
+      })
+    events = contract.get_filter_logs.arbitration_proposal_submitted(filter_id)
+
+    events.each{ |event|
+      transaction_id = event[:transactionHash]
+      transaction = $eth_client.eth_get_transaction_receipt(transaction_id)
+
+      log = transaction['result']['logs'].detect{ |item|
+        item['topics'][0] == "0x4bd75e3dd1ce1ee16eac7d60271c123a291a08d52602dcc026bfdb0fcd984983"
+      }
+      data = log['data']
+      
+      args = $eth_decoder.decode_arguments(event_inputs, data)
+
+      user_address = args[0]
+      arbitrament = self.arbitraments.detect{ |some|
+        some.user.eth_wallet_address == user_address
+      }
+
+      if arbitrament.present?
+
+        if (args[1].to_i == arbitrament.owner_rate) and (args[2].to_i == arbitrament.renter_rate)
+          arbitrament.update!(tx_id: transaction_id)
+
+          transaction = self.transactions.build(at: DateTime.current, 
+                                              content: "#{arbitrament.user.desc} 提交仲裁意见, 房东:#{arbitrament.owner_rate}  房客#{arbitrament.renter_rate}", 
+                                tx_id: transaction_id)
+          transaction.save!
+        else
+          Rails.logger.error("arbitrament inconsistent on chain: (#{args[1].to_i}, #{args[2].to_i}) vs (#{arbitrament.owner_rate}, #{arbitrament.renter_rate})")
+        end
+      end
+    }
+  end
+   
+  def scan_reply(reply)
+    unless self.initialized
+      Rails.logger.error("contranct is not on_chain: #{self.id}}")
+      return 
+    end
+    contract = self.build_chainly_contract
+
+    event_abi = contract.abi.find {|a| a['name'] =='ArbitrationDataSubmitted'}
+    event_inputs = event_abi['inputs'].map {|i| OpenStruct.new(i)}
+
+    filter_id = contract.new_filter.arbitration_data_submitted({
+      from_block: reply.block_number,
+      to_block: 'latest',
+      address: self.chain_address,
+      })
+    events = contract.get_filter_logs.arbitration_data_submitted(filter_id)
+
+    events.each{ |event|
+      transaction_id = event[:transactionHash]
+      transaction = $eth_client.eth_get_transaction_receipt(transaction_id)
+
+      log = transaction['result']['logs'].detect{ |item|
+        item['topics'][0] == "0x44fa3c47a2ffb313e06ae135667481e7c75ae5cc163222ab899585a546cff81e"
+      }
+      data = log['data']
+      
+      args = $eth_decoder.decode_arguments(event_inputs, data)
+
+      user_address = args[0]
+      unless reply.user.eth_wallet_address == user_address
+        Rails.logger.error("user_address: #{user_address}}, appeal_user_address:#{reply.user.eth_wallet_address}")
+        next
+      end
+
+      begin
+        contract.launch_reply!(reply.user)
+        reply.update!(tx_id: transaction_id)
+      rescue AASM::InvalidTransition => e
+        Rails.logger.error("appeal_id: #{reply.id}, launch appeal faield:#{e.message}")
+        next
+      end
+
+      transaction = self.transactions.build(at: DateTime.current, 
+                                            content: "#{reply.user.desc} 发起答辩, 金额:#{reply.amount} #{self.currency.name}", 
+                              tx_id: transaction_id)
+      transaction.save!
+
+    }
+  end
+   
+
+
   def scan_appeal(appeal)
     unless self.initialized
       Rails.logger.error("contranct is not on_chain: #{self.id}}")
@@ -114,7 +254,6 @@ class Contract < ApplicationRecord
       })
     events = contract.get_filter_logs.arbitration_data_submitted(filter_id)
 
-    binding.pry
     events.each{ |event|
       transaction_id = event[:transactionHash]
       transaction = $eth_client.eth_get_transaction_receipt(transaction_id)
@@ -141,7 +280,7 @@ class Contract < ApplicationRecord
       end
 
       transaction = self.transactions.build(at: DateTime.current, 
-                                            content: "#{appeal.user.desc} 发起仲裁#{bill.item}, 金额:#{amount} #{self.currency.name}", 
+                                            content: "#{appeal.user.desc} 发起仲裁, 金额:#{appeal.amount} #{self.currency.name}", 
                               tx_id: transaction_id)
       transaction.save!
 
@@ -272,7 +411,7 @@ class Contract < ApplicationRecord
         self.id.to_s,
         self.owner.eth_wallet_address,
         self.renter.eth_wallet_address,
-        self.promoter.eth_wallet_address,
+        self.promoter.try(:eth_wallet_address) || ENV['RENT_ADMIN_ADDRESS'],#null promoter set the admin address
         self.currency.addr,
         (self.trans_monthly_price * (10 ** self.currency.decimals) * self.trans_pay_amount).to_i,
         (self.trans_period / self.trans_pay_amount).to_i,

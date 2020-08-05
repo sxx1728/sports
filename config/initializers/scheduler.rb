@@ -10,7 +10,8 @@ contract_factory = Contract.build_contract_factory
 
 s.every('20s', overlap: false){
 
-   Contract.where(state: 'running').where(initialized: false).each{ |contract|
+  
+  Contract.where(state: 'running').where(initialized: false).each{ |contract|
     Rails.logger.info('Deploying')
     contract.deploy(contract_factory)
   }
@@ -37,15 +38,7 @@ s.every('20s', overlap: false){
     appeal.contract.scan_appeal(appeal)
   }
 
-  #scan appeals
-  Reply.where(tx_id: nil).each{ |appeal|
-    next unless appeal.contract.running?
-
-    Rails.logger.error('Scan reply event')
-    appeal.contract.scan_reply(reply)
-  }
-
-  #scan appeals
+  #scan replies
   Reply.where(tx_id: nil).each{ |appeal|
     next unless appeal.contract.running?
 

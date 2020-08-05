@@ -56,13 +56,6 @@ module API
               reply.update!(reply: params[:reply], user: user, at: DateTime.current, images: images)
             end
 
-
-            begin
-              contract.launch_reply!(user)
-            rescue AASM::InvalidTransition => e
-              app_error(e.message)
-            end
-
             present contract.reply, with: API::V1::Entities::Reply
           end
 

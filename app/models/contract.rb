@@ -1,6 +1,9 @@
 require 'ostruct'
+require 'utils'
 
 class Contract < ApplicationRecord
+
+  include Utils
 
   belongs_to :renter, class_name: "Renter::User"
   belongs_to :owner, class_name: "Owner::User"
@@ -117,6 +120,7 @@ class Contract < ApplicationRecord
       log = transaction['result']['logs'].detect{ |item|
         item['topics'][0] == "0xcb3e47cde7ae1301b800b024166f8350606b5ced55e601cbcfe585d73f78d2bb"
       }
+      next if log.nil?
       data = log['data']
       
       args = $eth_decoder.decode_arguments(event_inputs, data)
@@ -200,41 +204,36 @@ class Contract < ApplicationRecord
       to_block: 'latest',
       address: self.chain_address,
       })
-    events = contract.get_filter_logs.arbitration_data_submitted(filter_id)
-
-    events.each{ |event|
-      transaction_id = event[:transactionHash]
+    event = contract.get_filter_logs.arbitration_data_submitted(filter_id).detect{ |some|
+      transaction_id = some[:transactionHash]
       transaction = $eth_client.eth_get_transaction_receipt(transaction_id)
 
       log = transaction['result']['logs'].detect{ |item|
         item['topics'][0] == "0x44fa3c47a2ffb313e06ae135667481e7c75ae5cc163222ab899585a546cff81e"
       }
+      return false if log.nil?
+
       data = log['data']
-      
       args = $eth_decoder.decode_arguments(event_inputs, data)
 
       user_address = args[0]
-      unless reply.user.eth_wallet_address == user_address
-        Rails.logger.error("user_address: #{user_address}}, appeal_user_address:#{reply.user.eth_wallet_address}")
-        next
-      end
-
-      begin
-        contract.launch_reply!(reply.user)
-        reply.update!(tx_id: transaction_id)
-      rescue AASM::InvalidTransition => e
-        Rails.logger.error("appeal_id: #{reply.id}, launch appeal faield:#{e.message}")
-        next
-      end
-
-      transaction = self.transactions.build(at: DateTime.current, 
-                                            content: "#{reply.user.desc} 发起答辩, 金额:#{reply.amount} #{self.currency.name}", 
-                              tx_id: transaction_id)
-      transaction.save!
-
+      return same_address?(reply.user.eth_wallet_address, user_address)
     }
+
+    return if event.nil?
+
+    begin
+      contract.launch_reply!(reply.user)
+      reply.update!(tx_id: event[:transactionHash])
+    rescue AASM::InvalidTransition => e
+      Rails.logger.error("appeal_id: #{reply.id}, launch appeal faield:#{e.message}")
+    end
+
+    transaction = self.transactions.build(at: DateTime.current, 
+                              content: "#{reply.user.desc} 发起答辩, 金额:#{reply.amount} #{self.currency.name}", 
+                              tx_id: transaction_id)
+    transaction.save!
   end
-   
 
 
   def scan_appeal(appeal)
@@ -252,39 +251,35 @@ class Contract < ApplicationRecord
       to_block: 'latest',
       address: self.chain_address,
       })
-    events = contract.get_filter_logs.arbitration_data_submitted(filter_id)
 
-    events.each{ |event|
-      transaction_id = event[:transactionHash]
+    event = contract.get_filter_logs.arbitration_data_submitted(filter_id).detect{ |some|
+      transaction_id = some[:transactionHash]
       transaction = $eth_client.eth_get_transaction_receipt(transaction_id)
 
       log = transaction['result']['logs'].detect{ |item|
         item['topics'][0] == "0x44fa3c47a2ffb313e06ae135667481e7c75ae5cc163222ab899585a546cff81e"
       }
-      data = log['data']
-      
-      args = $eth_decoder.decode_arguments(event_inputs, data)
-
-      user_address = args[0]
-      unless appeal.user.eth_wallet_address == user_address
-        Rails.logger.error("user_address: #{user_address}}, appeal_user_address:#{appeal.user.eth_wallet_address}")
-        next
+      unless log.nil?
+        data = log['data']
+        args = $eth_decoder.decode_arguments(event_inputs, data)
+        user_address = args[0]
+        same_address? appeal.user.eth_wallet_address, user_address
       end
+   }
 
-      begin
-        contract.launch_appeal!(appeal.user)
-        appeal.update!(tx_id: transaction_id)
-      rescue AASM::InvalidTransition => e
-        Rails.logger.error("appeal_id: #{ppeal.id}, launch appeal faield:#{e.message}")
-        next
-      end
+    return if event.nil?
 
-      transaction = self.transactions.build(at: DateTime.current, 
-                                            content: "#{appeal.user.desc} 发起仲裁, 金额:#{appeal.amount} #{self.currency.name}", 
-                              tx_id: transaction_id)
-      transaction.save!
+    begin
+      self.launch_appeal!(appeal.user)
+      appeal.update!(tx_id: event[:transactionHash])
+    rescue AASM::InvalidTransition => e
+      Rails.logger.error("appeal_id: #{ppeal.id}, launch appeal faield:#{e.message}")
+    end
 
-    }
+    transaction = self.transactions.build(at: DateTime.current, 
+                                          content: "#{appeal.user.desc} 发起仲裁, 争议金额:#{appeal.amount} #{self.currency.name}", 
+                            tx_id: event[:transactionHash])
+    transaction.save!
   end
    
 

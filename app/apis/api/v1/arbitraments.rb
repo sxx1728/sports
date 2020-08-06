@@ -68,7 +68,7 @@ module API
                                    images: images,
                                    done: true)
 
-            present contracts_user, API::V1::Entities::Arbitrament
+            present contracts_user, with: API::V1::Entities::Arbitrament
 
           end
 

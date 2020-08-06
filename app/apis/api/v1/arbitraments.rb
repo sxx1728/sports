@@ -56,17 +56,16 @@ module API
               img_id
             }
 
+
             
             contracts_user = ContractsUser.where(user: user, contract: contract).first
-            
-            app_error('不能重复评判') if contracts_user.done
 
-            server_error('关联无效了') unless contracts_user.present?
+            server_error('关联无效了') if contracts_user.nil?
 
             contracts_user.update!(owner_rate: params[:owner_rate], 
                                    renter_rate: params[:renter_rate], 
                                    desc: params[:desc], 
-                                   images: params[:images],
+                                   images: images,
                                    done: true)
 
             present contracts_user, API::V1::Entities::Arbitrament

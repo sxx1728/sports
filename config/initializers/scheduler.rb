@@ -8,7 +8,7 @@ s = Rufus::Scheduler.singleton
 
 contract_factory = Contract.build_contract_factory
 
-s.every('20s', overlap: false){
+s.every('20m', overlap: false){
 
   
   Contract.where(state: 'running').where(initialized: false).each{ |contract|
@@ -39,11 +39,12 @@ s.every('20s', overlap: false){
   }
 
   #scan replies
-  Reply.where(tx_id: nil).each{ |appeal|
-    next unless appeal.contract.running?
+  Reply.where(tx_id: nil).each{ |reply|
+    contract = reply.contract
+    next unless (contract.renter_appealed? or  contract.owner_appealed?)
 
     Rails.logger.error('Scan reply event')
-    appeal.contract.scan_reply(reply)
+    contract.scan_reply(reply)
   }
 
   Contract.where(state: 'arbitrating').each{ |contract|
@@ -56,7 +57,7 @@ s.every('20s', overlap: false){
     end
 
     arbitrated_count = contract.arbitraments.where.not(tx_id: nil).count
-    if arbitrating_count >= 3
+    if arbitrated_count >= 3
       Rails.logger.error('scan arbitrament result')
       contract.scan_arbitrament_result()
     end

@@ -151,7 +151,7 @@ class Contract < ApplicationRecord
     event_inputs = event_abi['inputs'].map {|i| OpenStruct.new(i)}
 
     filter_id = contract.new_filter.arbitration_data_submitted({
-      from_block: '0x0',
+      from_block: self.reply.block_number || '0x0',
       to_block: 'latest',
       address: self.chain_address,
       })
@@ -164,27 +164,27 @@ class Contract < ApplicationRecord
       log = transaction['result']['logs'].detect{ |item|
         item['topics'][0] == "0x4bd75e3dd1ce1ee16eac7d60271c123a291a08d52602dcc026bfdb0fcd984983"
       }
+      next if log.nil?
+
       data = log['data']
       
       args = $eth_decoder.decode_arguments(event_inputs, data)
-
       user_address = args[0]
       arbitrament = self.arbitraments.detect{ |some|
-        some.user.eth_wallet_address == user_address
+        arbitrament.tx_id == nil and  same_address?(some.user.eth_wallet_address, user_address)
       }
 
-      if arbitrament.present?
+      next if arbitrament.nil?
 
-        if (args[1].to_i == arbitrament.owner_rate) and (args[2].to_i == arbitrament.renter_rate)
-          arbitrament.update!(tx_id: transaction_id)
+      if (args[1].to_i == arbitrament.owner_rate) and (args[2].to_i == arbitrament.renter_rate)
+        arbitrament.update!(tx_id: transaction_id)
 
-          transaction = self.transactions.build(at: DateTime.current, 
-                                              content: "#{arbitrament.user.desc} 提交仲裁意见, 房东:#{arbitrament.owner_rate}  房客#{arbitrament.renter_rate}", 
-                                tx_id: transaction_id)
-          transaction.save!
-        else
-          Rails.logger.error("arbitrament inconsistent on chain: (#{args[1].to_i}, #{args[2].to_i}) vs (#{arbitrament.owner_rate}, #{arbitrament.renter_rate})")
-        end
+        transaction = self.transactions.build(at: DateTime.current, 
+                                            content: "#{arbitrament.user.desc} 提交仲裁意见, 房东:#{arbitrament.owner_rate}  房客#{arbitrament.renter_rate}", 
+                              tx_id: transaction_id)
+        transaction.save!
+      else
+        Rails.logger.error("arbitrament inconsistent on chain: (#{args[1].to_i}, #{args[2].to_i}) vs (#{arbitrament.owner_rate}, #{arbitrament.renter_rate})")
       end
     }
   end
@@ -204,6 +204,7 @@ class Contract < ApplicationRecord
       to_block: 'latest',
       address: self.chain_address,
       })
+
     event = contract.get_filter_logs.arbitration_data_submitted(filter_id).detect{ |some|
       transaction_id = some[:transactionHash]
       transaction = $eth_client.eth_get_transaction_receipt(transaction_id)
@@ -211,26 +212,27 @@ class Contract < ApplicationRecord
       log = transaction['result']['logs'].detect{ |item|
         item['topics'][0] == "0x44fa3c47a2ffb313e06ae135667481e7c75ae5cc163222ab899585a546cff81e"
       }
-      return false if log.nil?
+      unless log.nil?
 
-      data = log['data']
-      args = $eth_decoder.decode_arguments(event_inputs, data)
+        data = log['data']
+        args = $eth_decoder.decode_arguments(event_inputs, data)
 
-      user_address = args[0]
-      return same_address?(reply.user.eth_wallet_address, user_address)
+        user_address = args[0]
+        same_address?(reply.user.eth_wallet_address, user_address)
+      end
     }
 
     return if event.nil?
 
     begin
-      contract.launch_reply!(reply.user)
+      self.launch_reply!(reply.user)
       reply.update!(tx_id: event[:transactionHash])
     rescue AASM::InvalidTransition => e
       Rails.logger.error("appeal_id: #{reply.id}, launch appeal faield:#{e.message}")
     end
 
     transaction = self.transactions.build(at: DateTime.current, 
-                              content: "#{reply.user.desc} 发起答辩, 金额:#{reply.amount} #{self.currency.name}", 
+                                          content: "#{reply.user.desc} 做出答辩", 
                               tx_id: transaction_id)
     transaction.save!
   end

@@ -17,12 +17,10 @@ module API
             contract = Contract.find params[:contract_id] rescue nil
             app_error('无效合同id') if contract.nil?
 
-            app_error('合同状态无效') unless contract.arbitrated?
+            arbitrament = contract.arbitraments.where(user: user).first
+            app_error('没有权限查看') if arbitrament.nil?
 
-            app_error('无权限查看') unless (contract.arbitrators.include?(user) || contract.renter == user || contract.owner == user)
-
-            present :result, contract.arbitrament_result, with: API::V1::Entities::ArbitramentResult
-            present :arbitraments, contract.arbitraments, with: API::V1::Entities::Arbitrament
+            present arbitrament, with: API::V1::Entities::Arbitrament
           end
 
 

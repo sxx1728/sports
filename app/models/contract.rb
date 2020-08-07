@@ -100,6 +100,26 @@ class Contract < ApplicationRecord
     bill.save!
   end
 
+  def scan_income()
+    unless self.initialized
+      Rails.logger.error("contranct is not on_chain: #{self.id}}")
+      return 
+    end
+
+    contract = self.build_chainly_contract
+
+    event_abi = contract.abi.find {|a| a['name'] == 'RentFeeReceived'}
+    event_inputs = event_abi['inputs'].map {|i| OpenStruct.new(i)}
+
+    filter_id = contract.new_filter.rent_fee_received({
+      from_block: bill.block_height || '0x0',
+      to_block: 'latest',
+      address: self.chain_address,
+      })
+    events = contract.get_filter_logs.rent_fee_received(filter_id)
+  end
+ 
+
   def scan_arbitrament_result()
     contract = self.build_chainly_contract
 

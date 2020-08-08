@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_06_170939) do
+ActiveRecord::Schema.define(version: 2020_08_08_091907) do
 
   create_table "admins", force: :cascade do |t|
     t.string "email", limit: 128, default: "", null: false
@@ -60,7 +60,7 @@ ActiveRecord::Schema.define(version: 2020_08_06_170939) do
     t.integer "contract_id"
     t.datetime "at"
     t.string "cause"
-    t.string "amount"
+    t.decimal "amount", precision: 20, scale: 8
     t.string "tx_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
@@ -201,6 +201,9 @@ ActiveRecord::Schema.define(version: 2020_08_06_170939) do
     t.string "tx_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.integer "user_id"
+    t.string "block_height"
+    t.integer "cycle"
     t.index ["contract_id"], name: "index_incomes_on_contract_id"
   end
 

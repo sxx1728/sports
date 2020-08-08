@@ -30,6 +30,7 @@ module API
       mount API::V1::ArbitramentResults
       mount API::V1::Currencies
       mount API::V1::Transactions
+      mount API::V1::Incomes
 
       namespace :doc do
         

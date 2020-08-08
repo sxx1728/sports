@@ -15,6 +15,7 @@ class Contract < ApplicationRecord
   has_one :reply
   has_one :arbitrament_result
   has_many :transactions
+  has_many :incomes
 
   has_many :arbitraments, class_name: "::ContractsUser"
 
@@ -100,7 +101,142 @@ class Contract < ApplicationRecord
     bill.save!
   end
 
-  def scan_income()
+  def scan_promoter_income(contract)
+
+    return if self.promoter.nil?
+    return if self.incomes.where(item: 'promoter-fee').exists?
+    event_abi = contract.abi.find {|a| a['name'] == 'PromoterFeePaid'}
+    event_inputs = event_abi['inputs'].map {|i| OpenStruct.new(i)}
+
+    filter_id = contract.new_filter.promoter_fee_paid({
+      from_block: '0x0',
+      to_block: 'latest',
+      address: self.chain_address,
+      })
+    events = contract.get_filter_logs.promoter_fee_paid(filter_id)
+    return if events.count != 1
+
+    event = events[0]
+    transaction_id = event[:transactionHash]
+    transaction = $eth_client.eth_get_transaction_receipt(transaction_id)
+
+    log = transaction['result']['logs'].detect{ |item|
+      item['topics'][0] == "0x1719f634d221d35b40e30f66edbf6124b85fdd0b9ef0f512ceaed896d2d45451"
+    }
+    return if log.nil?
+    data = log['data']
+    
+    binding.pry
+    args = $eth_decoder.decode_arguments(event_inputs, data)
+
+    address = args[0]
+    unless same_address? self.promoter.eth_wallet_address, address
+      Rails.logger.error("contranct promoter address:#{self.promoter.eth_wallet_address} not same as contract event:#{address}")
+      return
+    end
+    tokenAddr = args[2]
+    currency = Currency.where(addr: tokenAddr).first
+    if currency.nil?
+      Rails.logger.error("contract token addr invalid:#{tokenAddr}")
+      return
+    end
+
+
+    amount = args[1]
+    income = self.incomes.build(user: self.promoter, at: DateTime.current, tx_id: transaction_id, item: 'promoter-fee', amount: amount, currency: currency.name)
+    income.save!
+  end
+
+  def scan_pledge_income(contract)
+    return if self.incomes.where(item: 'pledge-fee').exists?
+    event_abi = contract.abi.find {|a| a['name'] == 'RentPledgeReleased'}
+    event_inputs = event_abi['inputs'].map {|i| OpenStruct.new(i)}
+
+    filter_id = contract.new_filter.rent_pledge_released({
+      from_block: '0x0',
+      to_block: 'latest',
+      address: self.chain_address,
+      })
+    events = contract.get_filter_logs.rent_pledge_released(filter_id)
+    return if events.count != 1
+
+    event = events[0]
+    transaction_id = event[:transactionHash]
+    transaction = $eth_client.eth_get_transaction_receipt(transaction_id)
+
+    log = transaction['result']['logs'].detect{ |item|
+      item['topics'][0] == "0x979d7bf204c4f2d65a9059d99b1dcd279db8e7c6384584e5d29a28fdb4b4d75a"
+    }
+    return if log.nil?
+    data = log['data']
+    
+    args = $eth_decoder.decode_arguments(event_inputs, data)
+
+    address = args[0]
+    unless same_address? self.renter.eth_wallet_address, address
+      Rails.logger.error("contranct renter address:#{self.promoter.eth_wallet_address} not same as contract event:#{address}")
+      return
+    end
+    tokenAddr = args[2]
+    currency = Currency.where(addr: tokenAddr).first
+    if currency.nil?
+      Rails.logger.error("contract token addr invalid:#{tokenAddr}")
+      return
+    end
+
+    amount = args[1]
+    income = self.incomes.build(user: self.renter, at: DateTime.current, tx_id: transaction_id, item: 'pledge-fee', amount: amount, currency: currency.name)
+    income.save!
+  end
+
+  def scan_rent_income(contract)
+    event_abi = contract.abi.find {|a| a['name'] == 'RentFeeReleased'}
+    event_inputs = event_abi['inputs'].map {|i| OpenStruct.new(i)}
+
+    block_height = self.incomes.where(item: 'rent-fee').order(cycle: :desc).first.try(:block_height)
+    filter_id = contract.new_filter.rent_fee_released({
+      from_block: block_height || '0x0',
+      to_block: 'latest',
+      address: self.chain_address,
+      })
+    events = contract.get_filter_logs.rent_fee_released(filter_id)
+    binding.pry
+
+    events.each { |event|
+      transaction_id = event[:transactionHash]
+      transaction = $eth_client.eth_get_transaction_receipt(transaction_id)
+
+      log = transaction['result']['logs'].detect{ |item|
+        item['topics'][0] == "0x92779d26a19837706a0aa9ad1d968b5cf152951b31c826299fcb6d2bde543cf7"
+      }
+      binding.pry
+      return if log.nil?
+      data = log['data']
+    
+      args = $eth_decoder.decode_arguments(event_inputs, data)
+
+      binding.pry
+      address = args[0]
+      ##fix me
+      unless same_address? self.owner.eth_wallet_address, address
+        Rails.logger.error("contranct owner address:#{self.owner.eth_wallet_address} not same as contract event:#{address}")
+        return
+      end
+      tokenAddr = args[2]
+      currency = Currency.where(addr: tokenAddr).first
+      if currency.nil?
+        Rails.logger.error("contract token addr invalid:#{tokenAddr}")
+        return
+      end
+
+      amount = args[1]
+      income = self.incomes.build(user: self.owner, at: DateTime.current, tx_id: transaction_id, item: 'rent-fee', amount: amount, currency: currency.name, block_heigt: log['blockNumber'])
+      income.save!
+    }
+  end
+
+
+  def scan_running_income()
     unless self.initialized
       Rails.logger.error("contranct is not on_chain: #{self.id}}")
       return 
@@ -108,15 +244,9 @@ class Contract < ApplicationRecord
 
     contract = self.build_chainly_contract
 
-    event_abi = contract.abi.find {|a| a['name'] == 'RentFeeReceived'}
-    event_inputs = event_abi['inputs'].map {|i| OpenStruct.new(i)}
-
-    filter_id = contract.new_filter.rent_fee_received({
-      from_block: bill.block_height || '0x0',
-      to_block: 'latest',
-      address: self.chain_address,
-      })
-    events = contract.get_filter_logs.rent_fee_received(filter_id)
+    scan_promoter_income(contract)
+    scan_pledge_income(contract)
+    scan_rent_income(contract)
   end
  
 
@@ -126,42 +256,41 @@ class Contract < ApplicationRecord
     event_abi = contract.abi.find {|a| a['name'] =='ArbitrationResultGenerated'}
     event_inputs = event_abi['inputs'].map {|i| OpenStruct.new(i)}
 
-    filter_id = contract.new_filter.arbitration_data_submitted({
+    filter_id = contract.new_filter.arbitration_result_generated({
       from_block: '0x0',
       to_block: 'latest',
       address: self.chain_address,
       })
     events = contract.get_filter_logs.arbitration_result_generated(filter_id)
 
-    events.each{ |event|
-      transaction_id = event[:transactionHash]
-      transaction = $eth_client.eth_get_transaction_receipt(transaction_id)
+    return if events.count != 1
 
-      log = transaction['result']['logs'].detect{ |item|
-        item['topics'][0] == "0xcb3e47cde7ae1301b800b024166f8350606b5ced55e601cbcfe585d73f78d2bb"
-      }
-      next if log.nil?
-      data = log['data']
-      
-      args = $eth_decoder.decode_arguments(event_inputs, data)
+    event = events[0]
+    transaction_id = event[:transactionHash]
+    transaction = $eth_client.eth_get_transaction_receipt(transaction_id)
 
-      arbitrament_result = self.arbitrament_result
-
-      unless arbitrament_result.present?
-        arbitrament_result = self.build_arbitrament_result(owner_rate: args[0], renter_rate: args[1],
-                                                           tx_id: transaction_id)
-        arbitrament_result.save!
-
-        transaction = self.transactions.build(at: DateTime.current, 
-                                              content: "最终仲裁结果如下：房东:#{arbitrament_result.owner_rate}% #{arbitrament_result.owner_rate/100.0 * self.appeal.amount} #{self.currency.name}  ,房客#{arbitrament_result.renter_rate}% #{arbitrament_result/100.0 * self.appeal.amount} #{self.currency.name}", 
-                                tx_id: transaction_id)
-        transaction.save!
-
-        self.arbitrate!
-      else
-        Rails.logger.error("arbitrament inconsistent on chain: (#{args[1].to_i}, #{args[2].to_i}) vs (#{arbitrament.owner_rate}, #{arbitrament.renter_rate})")
-      end
+    log = transaction['result']['logs'].detect{ |item|
+      item['topics'][0] == "0xcb3e47cde7ae1301b800b024166f8350606b5ced55e601cbcfe585d73f78d2bb"
     }
+    return if log.nil?
+    data = log['data']
+    
+    args = $eth_decoder.decode_arguments(event_inputs, data)
+
+    arbitrament_result = self.arbitrament_result
+
+    unless arbitrament_result.present?
+      arbitrament_result = self.build_arbitrament_result(owner_rate: args[0], renter_rate: args[1],
+                                                         tx_id: transaction_id)
+      arbitrament_result.save!
+
+      transaction = self.transactions.build(at: DateTime.current, 
+                                            content: "最终仲裁结果如下：房东:#{arbitrament_result.owner_rate}% #{arbitrament_result.owner_rate/100.0 * self.appeal.amount} #{self.currency.name}, 房客#{arbitrament_result.renter_rate}% #{arbitrament_result.renter_rate/100.0 * self.appeal.amount} #{self.currency.name}", 
+                              tx_id: transaction_id)
+      transaction.save!
+
+      self.arbitrate!
+    end
   end
    
   def scan_arbitrating()
@@ -170,7 +299,7 @@ class Contract < ApplicationRecord
     event_abi = contract.abi.find {|a| a['name'] =='ArbitrationProposalSubmitted'}
     event_inputs = event_abi['inputs'].map {|i| OpenStruct.new(i)}
 
-    filter_id = contract.new_filter.arbitration_data_submitted({
+    filter_id = contract.new_filter.arbitration_proposal_submitted({
       from_block: self.reply.block_number || '0x0',
       to_block: 'latest',
       address: self.chain_address,
@@ -180,6 +309,7 @@ class Contract < ApplicationRecord
     events.each{ |event|
       transaction_id = event[:transactionHash]
       transaction = $eth_client.eth_get_transaction_receipt(transaction_id)
+
 
       log = transaction['result']['logs'].detect{ |item|
         item['topics'][0] == "0x4bd75e3dd1ce1ee16eac7d60271c123a291a08d52602dcc026bfdb0fcd984983"
@@ -191,14 +321,13 @@ class Contract < ApplicationRecord
       args = $eth_decoder.decode_arguments(event_inputs, data)
       user_address = args[0]
       arbitrament = self.arbitraments.detect{ |some|
-        arbitrament.tx_id == nil and  same_address?(some.user.eth_wallet_address, user_address)
+        some.tx_id == nil and  same_address?(some.user.eth_wallet_address, user_address)
       }
 
       next if arbitrament.nil?
 
-      if (args[1].to_i == arbitrament.owner_rate) and (args[2].to_i == arbitrament.renter_rate)
-        arbitrament.update!(tx_id: transaction_id)
-
+      if (args[1].to_i == arbitrament.owner_rate * 10) and (args[2].to_i == arbitrament.renter_rate * 10)
+        arbitrament.update!(tx_id: transaction_id, at: DateTime.current)
         transaction = self.transactions.build(at: DateTime.current, 
                                             content: "#{arbitrament.user.desc} 提交仲裁意见, 房东:#{arbitrament.owner_rate}  房客#{arbitrament.renter_rate}", 
                               tx_id: transaction_id)

@@ -8,7 +8,7 @@ s = Rufus::Scheduler.singleton
 
 contract_factory = Contract.build_contract_factory
 
-s.every('1m', overlap: false){
+s.every('20s', overlap: false){
 
   
   Contract.where(state: 'running').where(initialized: false).each{ |contract|
@@ -62,10 +62,6 @@ s.every('1m', overlap: false){
       Rails.logger.error('scan arbitrament result')
       contract.scan_arbitrament_result()
     end
-  }
-
-  Contract.where(state: 'arbitrated').each{ |contract|
-    contract.scan_running_income()
   }
 
 }

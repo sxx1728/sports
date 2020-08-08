@@ -289,6 +289,12 @@ class Contract < ApplicationRecord
                               tx_id: transaction_id)
       transaction.save!
 
+      income = self.incomes.build(user: self.owner, at: DateTime.current, tx_id: transaction_id, item: 'arbitrament-fee', amount: self.appeal.amount * args[0]/1000.0, currency: self.currency.name)
+      income.save!
+
+      income = self.incomes.build(user: self.renter, at: DateTime.current, tx_id: transaction_id, item: 'arbitrament-fee', amount: self.appeal.amount * args[1]/1000.0, currency: self.currency.name)
+      income.save!
+
       self.arbitrate!
     end
   end

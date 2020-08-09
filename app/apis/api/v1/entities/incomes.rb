@@ -5,8 +5,11 @@ module API
 
         expose :id
         expose :at
-        expose :item
+        expose :item do |m, o|
+          m.item_desc
+        end
         expose :amount
+        expose :currency
         expose :tx_id
 
       end

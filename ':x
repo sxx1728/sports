@@ -10,10 +10,10 @@ class Income < ApplicationRecord
       '中介费'
     when 'pledge-fee'
       '押金'
+
     when 'arbitrament-fee'
       '仲裁金额'
-    else 
-      '未知'
+    else '未知'
     end
   end
 end

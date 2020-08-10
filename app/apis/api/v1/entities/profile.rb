@@ -3,6 +3,7 @@ module API
     module Entities
       class Profile < Grape::Entity
         include API::Helpers
+        expose :id
         expose :type do |m, o|
           m.type.split('::')[0]
         end

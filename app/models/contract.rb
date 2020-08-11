@@ -126,7 +126,6 @@ class Contract < ApplicationRecord
     return if log.nil?
     data = log['data']
     
-    binding.pry
     args = $eth_decoder.decode_arguments(event_inputs, data)
 
     address = args[0]
@@ -200,7 +199,6 @@ class Contract < ApplicationRecord
       address: self.chain_address,
       })
     events = contract.get_filter_logs.rent_fee_released(filter_id)
-    binding.pry
 
     events.each { |event|
       transaction_id = event[:transactionHash]
@@ -209,13 +207,11 @@ class Contract < ApplicationRecord
       log = transaction['result']['logs'].detect{ |item|
         item['topics'][0] == "0x92779d26a19837706a0aa9ad1d968b5cf152951b31c826299fcb6d2bde543cf7"
       }
-      binding.pry
       return if log.nil?
       data = log['data']
     
       args = $eth_decoder.decode_arguments(event_inputs, data)
 
-      binding.pry
       address = args[0]
       ##fix me
       unless same_address? self.owner.eth_wallet_address, address

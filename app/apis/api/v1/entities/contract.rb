@@ -55,6 +55,10 @@ module API
         expose :state do|m, o|
           m.state_desc o[:user]
         end
+        expose :raw_state do|m, o|
+          m.state
+        end
+
 
         expose :arbitrators, using: API::V1::Entities::Arbitrators
         expose :chain_address

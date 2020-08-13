@@ -147,6 +147,24 @@ class Contract < ApplicationRecord
     bill.save!
   end
 
+  def release_rent_fee(contract)
+    count = self.incomes.where(item: 'renter-fee').where.not(tx_id: nil).count
+    pay_count = self.bills.where(paid: true).count * self.trans_pay_amount
+    return if count >= pay_count
+
+    pay_on = self.trans_begin_on + count.minutes
+    return if Date.current < pay_on
+
+    ret = contract.transact_and_wait.release_rent_fee()
+    Rails.logger.error(ret)
+    unless ret.mined
+      Rails.logger.error(ret)
+    end
+
+  end
+
+
+
   def scan_promoter_income(contract)
 
     return if self.promoter.nil?
@@ -265,14 +283,14 @@ class Contract < ApplicationRecord
         return
       end
       tokenAddr = args[2]
-      currency = Currency.where(addr: tokenAddr).first
+      currency = Currency.where("addr like '%#{tokenAddr}%'").first
       if currency.nil?
         Rails.logger.error("contract token addr invalid:#{tokenAddr}")
         return
       end
 
       amount = args[1]
-      income = self.incomes.build(user: self.owner, at: DateTime.current, tx_id: transaction_id, item: 'rent-fee', amount: amount, currency: currency.name, block_heigt: log['blockNumber'])
+      income = self.incomes.build(user: self.owner, at: DateTime.current, tx_id: transaction_id, item: 'rent-fee', amount: amount, currency: currency.name, block_height: log['blockNumber'])
       income.save!
     }
   end
@@ -289,6 +307,7 @@ class Contract < ApplicationRecord
     scan_promoter_income(contract)
     scan_pledge_income(contract)
     scan_rent_income(contract)
+    release_rent_fee(contract)
   end
  
 

@@ -86,6 +86,52 @@ class Contract < ApplicationRecord
  
   end
 
+  def balance_unpaid()
+    if ['unsigned', 'renter_signed', 'owner_signed', 'canceled', 'rejected', 'broken'].include?(self.state)
+      0
+    else
+      total = self.trans_monthly_price * (self.trans_period + self.trans_pledge_amount + self.trans_agency_fee_rate )
+      paid = self.bills.where(paid: true).sum(:amount)
+      total - paid
+    end
+  end
+
+  def balance_pledged()
+    if ['unsigned', 'renter_signed', 'owner_signed', 'canceled', 'rejected', 'broken'].include?(self.state)
+      0
+    else
+      paid = self.bills.where(paid: true).sum(:amount)
+      if paid > 0
+        self.trans_monthly_price * self.trans_pledge_amount 
+      else
+        0
+      end
+    end
+  end
+
+  def balance_rent_fee()
+    if ['unsigned', 'renter_signed', 'owner_signed', 'canceled', 'rejected', 'broken'].include?(self.state)
+      0
+    else
+      all = self.bills.where(paid: true).count
+      paid = self.incomes.where(item: 'renter-fee').count
+      if all > paid
+        self.trans_monthly_price * (all - paid)
+      else
+        0
+      end
+    end
+  end
+
+  def balance_owner_income()
+    if ['unsigned', 'renter_signed', 'owner_signed', 'canceled', 'rejected', 'broken'].include?(self.state)
+      0
+    else
+      paid = self.incomes.where(item: 'renter-fee').sum(:amount)
+    end
+  end
+
+
   def trans_balance()
 
     in_amount = self.bills.where(in_or_out: true).where(paid: true).sum(:amount)

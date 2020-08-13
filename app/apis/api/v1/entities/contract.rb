@@ -58,12 +58,17 @@ module API
         expose :raw_state do|m, o|
           m.state
         end
-
-
         expose :arbitrators, using: API::V1::Entities::Arbitrators
         expose :chain_address
         expose :trans_balance 
+        expose :trans_balance_sheet do
+          expose :balance_unpaid
+          expose :balance_pledged
+          expose :balance_rent_fee
+          expose :balance_owner_income
+        end
       end
     end
   end
 end
+

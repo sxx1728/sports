@@ -201,13 +201,13 @@ module API
                                        trans_end_on: trans[:end_on])
 
             if trans[:coupon_code].present?
-              coupon = Coupon.where(code: trans[:coupon_code]).first
-              app_error('中介费优惠券无效') if coupon.nil?
-              contract.trans_agency_fee_rate_origin = 0.025;
-              contract.trans_agency_fee_rate = contract.trans_agency_fee_rate_origin - coupon.coupon_rate;
+              coupon = PromoterCode.where(code: trans[:coupon_code]).first
+              app_error('优惠券无效') if coupon.nil?
+              contract.trans_platform_fee_rate_origin = 0.01;
+              contract.trans_platform_fee_rate = contract.trans_platform_fee_rate_origin - 0.002;
             else
-              contract.trans_agency_fee_rate_origin = 0.025;
-              contract.trans_agency_fee_rate = contract.trans_agency_fee_rate_origin;
+              contract.trans_agency_fee_rate_origin = 0.01;
+              contract.trans_platform_fee_rate = contract.trans_platform_fee_rate_origin;
             end
 
             contract.renter = renter;

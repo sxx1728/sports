@@ -1,0 +1,2 @@
+class PromoterCode < ApplicationRecord
+end

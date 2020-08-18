@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_13_124152) do
+ActiveRecord::Schema.define(version: 2020_08_18_014841) do
 
   create_table "admins", force: :cascade do |t|
     t.string "email", limit: 128, default: "", null: false
@@ -147,7 +147,7 @@ ActiveRecord::Schema.define(version: 2020_08_13_124152) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "trans_coupon_rate"
-    t.decimal "trans_agency_fee_rate_origin"
+    t.decimal "trans_platform_fee_rate_origin"
     t.string "chain_address"
     t.boolean "initialized", default: false
     t.integer "currency_id"
@@ -225,6 +225,15 @@ ActiveRecord::Schema.define(version: 2020_08_13_124152) do
     t.integer "front_img_id"
     t.integer "back_img_id"
     t.index ["user_id"], name: "index_kycs_on_user_id"
+  end
+
+  create_table "promoter_codes", force: :cascade do |t|
+    t.integer "user_id"
+    t.string "code"
+    t.boolean "enabled"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_id"], name: "index_promoter_codes_on_user_id"
   end
 
   create_table "replies", force: :cascade do |t|

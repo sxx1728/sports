@@ -46,7 +46,7 @@ module API
         expose :trans_coupon_code
         expose :trans_coupon_rate
         expose :trans_agency_fee_rate
-        expose :trans_agency_fee_rate_origin
+        expose :trans_platform_fee_rate_origin
         expose :trans_agency_fee_by
         expose :trans_period
         expose :trans_begin_on

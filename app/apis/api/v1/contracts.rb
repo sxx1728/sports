@@ -206,7 +206,7 @@ module API
               contract.trans_platform_fee_rate_origin = 0.01;
               contract.trans_platform_fee_rate = contract.trans_platform_fee_rate_origin - 0.002;
             else
-              contract.trans_agency_fee_rate_origin = 0.01;
+              contract.trans_platform_fee_rate_origin = 0.01;
               contract.trans_platform_fee_rate = contract.trans_platform_fee_rate_origin;
             end
 

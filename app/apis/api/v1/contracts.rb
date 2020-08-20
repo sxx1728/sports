@@ -205,9 +205,11 @@ module API
               app_error('优惠券无效') if coupon.nil?
               contract.trans_platform_fee_rate_origin = 0.01;
               contract.trans_platform_fee_rate = contract.trans_platform_fee_rate_origin - 0.002;
+              contract.trans_agency_fee_rate = 0.02;
             else
               contract.trans_platform_fee_rate_origin = 0.01;
               contract.trans_platform_fee_rate = contract.trans_platform_fee_rate_origin;
+              contract.trans_agency_fee_rate = 0.02;
             end
 
             contract.renter = renter;

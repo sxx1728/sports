@@ -67,6 +67,13 @@ module API
           expose :balance_rent_fee
           expose :balance_owner_income
         end
+        expose :arbitrating_on_chain do|m,o|
+          if m.arbitrating?
+            m.arbitraments.where(user: o[:user]).first.try(:tx_id).try(:present?) || false
+          else
+            false
+          end
+        end
       end
     end
   end

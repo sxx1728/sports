@@ -15,6 +15,9 @@ module API
         expose :chain_data do |m,o|
           "arbitrament_id:#{m.id}, renter:#{m.renter_rate}, owner: #{m.owner_rate}, desc: #{m.desc}"
         end
+        expose :is_on_chain do |m,o|
+          m.tx_id.present?
+        end
       end
     end
   end

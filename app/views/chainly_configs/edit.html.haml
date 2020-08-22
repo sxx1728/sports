@@ -1,0 +1,13 @@
+%section.content-header
+  .container-fluid
+    .row.mb-2
+      .col-sm-6
+        %h1 修改链上费率设置
+      .col-sm-6 
+        %ol.breadcrumb.float-sm-right
+          %li.breadcrumb-item 费率管理
+          %li.breadcrumb-item.active 修改
+
+%section.content
+  .card.card-primary
+    = render :partial => "form"

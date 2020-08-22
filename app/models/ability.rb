@@ -8,11 +8,12 @@ class Ability
     if user.has_role? 'admin'
       can :manage, Role
       can :manage, Admin
-      can :manage, Room 
-      can :manage, Coin
+      can :manage, ChainlyConfig
+      can :manage, User
+      can :manage, Kyc
     elsif user.has_role? 'operator'
-      can :manage, Room 
-      can :manage, Coin
+      can :manage, User
+      can :manage, Kyc
     end
 
     # Define abilities for the passed in user here. For example:

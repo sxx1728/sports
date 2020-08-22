@@ -3,7 +3,7 @@ Rails.application.routes.draw do
   devise_for :admins,  controllers: { sessions: 'admins/sessions', registrations: 'admins/registrations' }
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
 
-  root 'rooms#index'
+  root 'admins#index'
 
   resources :admins do 
     resources :roles
@@ -13,8 +13,15 @@ Rails.application.routes.draw do
   end
 
 
-  resources :rooms 
-  resources :coins
+  resources :chainly_configs
+
+  resources :users
+  resources :kycs do
+    member do
+      patch :accept
+      patch :reject
+    end
+  end
 
   namespace :api do
     mount API::V1::Base => '/'

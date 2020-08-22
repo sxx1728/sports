@@ -30,10 +30,10 @@ module ApplicationHelper
   def brac_image image, options = {}
     versioned_image = options[:version] ? image.send(options[:version]) : image
     css_class = ['img-rounded', 'img-responsive'] << options[:class]
-    if versioned_image.url
-      link_to image_tag(versioned_image, class: css_class.flatten.join(' ')), versioned_image.url, target: '_blank'
+    if versioned_image.try(:url).present?
+      link_to image_tag(versioned_image.url, class: css_class.flatten.join(' ')), versioned_image.url, target: '_blank'
     else
-      image_tag('admin/no-image.png', class: 'img-rounded '+css_class.flatten.join(' '))
+      image_tag('avatar.png', class: 'img-rounded '+css_class.flatten.join(' '))
     end
   end
 

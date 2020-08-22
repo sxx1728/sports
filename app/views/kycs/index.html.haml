@@ -1,0 +1,52 @@
+%section.content-header
+  .container-fluid
+    .row.mb-2
+      .col-sm-6
+        %h1 审核列表
+      .col-sm-6 
+        %ol.breadcrumb.float-sm-right
+          %li.breadcrumb-item 审核管理
+          %li.breadcrumb-item.active 信息列表
+
+%section.content
+  .card
+    .p-0
+      %table.table.table-bordered
+        %tbody
+          %tr
+            %th ID
+            %th 用户ID
+            %th 真实姓名
+            %th 身份证号
+            %th 正面
+            %th 背面
+            %th 审核状态
+            %th 上传时间
+            %th 操作
+          - @kycs.each do |kyc|
+            %tr
+              %td 
+                = kyc.id
+              %td
+                = kyc.user_id
+              %td
+                = kyc.name
+              %td{style: "text-overflow = ellipsis;max-width: 150px;overflow: hidden;white-space: nowrap;resize: horizontal;"}
+                = kyc.id_no
+              %td{style: "text-overflow = ellipsis;max-width: 250px;overflow: hidden;white-space: nowrap;resize: horizontal;"}
+                = brac_image(kyc.front_img.try(:file))
+              %td{style: "text-overflow = ellipsis;max-width: 250px;overflow: hidden;white-space: nowrap;resize: horizontal;"}
+                = brac_image(kyc.back_img.try(:file))
+              %td 
+                = kyc.state_desc
+              %td 
+                = brac_datetime(kyc.created_at)
+              %td 
+                - if kyc.verifing?
+                  = link_to(raw('<i class="fas fa-user-check">&nbsp;</i>'), accept_kyc_path(kyc), data: { confirm: '确定审核通过吗?'}, method: :patch)
+                  = link_to(raw('<i class="fas fa-times-circle">&nbsp;</i>'), reject_kyc_path(kyc), data: { confirm: '确定拒绝该审核吗?'}, method: :patch)
+
+    .card-footer.clearfix
+      %ul.pagination.pagination-sm.m-0.float-right
+        = will_paginate @kycs, :container => false
+

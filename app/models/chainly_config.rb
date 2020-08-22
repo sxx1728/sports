@@ -1,0 +1,2 @@
+class ChainlyConfig < ApplicationRecord
+end

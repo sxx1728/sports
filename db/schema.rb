@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_18_014841) do
+ActiveRecord::Schema.define(version: 2020_08_22_162200) do
 
   create_table "admins", force: :cascade do |t|
     t.string "email", limit: 128, default: "", null: false
@@ -99,6 +99,14 @@ ActiveRecord::Schema.define(version: 2020_08_18_014841) do
     t.string "phone", limit: 16
     t.string "captcha", limit: 8
     t.datetime "expire_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "chainly_configs", force: :cascade do |t|
+    t.integer "platform_fee_rate"
+    t.integer "promoter_fee_rate"
+    t.integer "arbitration_fee_rate"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end

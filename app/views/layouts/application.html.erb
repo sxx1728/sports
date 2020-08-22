@@ -111,17 +111,41 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
 
+          <li class="nav-item has-treeview <%= "menu-open" if session['func'] == 'kycs' %>">
+            <a href="#" class="nav-link <%= "active" if 'kycs' == session['func'] %>">
+              <i class="nav-icon fas fa-coins"></i>
+              <p>
+                审核管理
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="<%=kycs_path(func: 'kycs', func_index: '1')%>" class="nav-link <%= "active" if 'kycs' == session['func'] and '1' == session['func_index'] %>">
+                  <i class="fas fa-list nav-icon"></i>
+                  <p>待审核订单</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="<%=kycs_path(func: 'kycs', func_index: '2')%>" class="nav-link <%= "active" if 'kycs' == session['func'] and '2' == session['func_index'] %>">
+                  <i class="fas fa-list nav-icon"></i>
+                  <p>全部审核订单</p>
+                </a>
+              </li>
+           </ul>
+          </li>
+
+          <% if current_admin.has_role? 'admin' %>
             <li class="nav-item">
-              <a href="<%=users_path(func: 'users')%>" class="nav-link <%= "active" if 'users' == session['func'] %>">
-                <i class="nav-icon fas fa-coins"></i>
+              <a href="<%=edit_chainly_config_path(id: ChainlyConfig.first.try(:id) || 0, func: 'chainly_config')%>" class="nav-link <%= "active" if 'chainly_config' == session['func'] %>">
+                <i class="nav-icon fas fa-tools"></i>
                 <p>
-                  用户列表
+                  设置链上费率
+                  <span class="right badge badge-danger">管理员</span>
                 </p>
               </a>
             </li>
-
-
-          <% if current_admin.has_role? 'admin' %>
+ 
             <li class="nav-item">
               <a href="<%=admins_path(func: 'system', func_index: '1')%>" class="nav-link <%= "active" if 'system' == session['func'] %>">
                 <i class="nav-icon fas fa-users"></i>

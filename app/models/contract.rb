@@ -647,6 +647,17 @@ class Contract < ApplicationRecord
 
   end
   
+  def self.build_config_contract
+
+    abi = File.read(Rails.root.join(ENV["RENT_CONFIG_ABI"]).to_s)
+    contract = Ethereum::Contract.create(client: $eth_client, name: "chainlyrentconfig", address: ENV["RENT_CONFIG_ADDRESS"], abi: abi)
+    key = Eth::Key.new(priv:ENV["RENT_ADMIN_KEY"])
+
+    contract.key = key
+
+    contract
+  end
+
 
   def self.build_contract_factory
 

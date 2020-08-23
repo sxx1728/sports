@@ -41,8 +41,24 @@ class ChainlyConfigsController < ApplicationController
   def update
     @chainly_config = ChainlyConfig.first
  
-    if @chainly_config.update_attributes!(permit_params)
-      redirect_to edit_chainly_config_path, notice: '更新成功！'
+    if @chainly_config.update_attributes(permit_params)
+
+      config_contract = Contract.build_config_contract
+      ret = config_contract.transact_and_wait.update_fee_rate(
+        @chainly_config.platform_fee_rate,
+        @chainly_config.promoter_fee_rate,
+        @chainly_config.arbitration_fee_rate
+      )
+
+      Rails.logger.info(ret)
+      if ret.mined
+        @chainly_config.save!
+        redirect_to edit_chainly_config_path, notice: '更新成功！'
+      else
+        Rails.logger.error(result)
+      end
+ 
+
     else
       redirect_back(fallback_location: edit_chainly_config_path, alert: "更新失败#{@chainly_config.errors.full_messages}")
     end

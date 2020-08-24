@@ -11,7 +11,9 @@ class Income < ApplicationRecord
     when 'pledge-fee'
       '押金'
     when 'arbitrament-fee'
-      '仲裁金额'
+      '合同仲裁金额'
+    when 'arbitrator-fee'
+      '仲裁手续费'
     else 
       '未知'
     end

@@ -114,12 +114,9 @@ class Contract < ApplicationRecord
       0
     else
       all = self.bills.where(paid: true).count
-      paid = self.incomes.where(item: 'renter-fee').count
-      if all > paid
-        self.trans_monthly_price * (all - paid)
-      else
-        0
-      end
+      paid = self.incomes.where(item: 'rent-fee').count
+      monthes = all * self.trans_pay_amount - paid
+      self.trans_monthly_price * monthes
     end
   end
 
@@ -127,16 +124,17 @@ class Contract < ApplicationRecord
     if ['unsigned', 'renter_signed', 'owner_signed', 'canceled', 'rejected', 'broken'].include?(self.state)
       0
     else
-      paid = self.incomes.where(item: 'renter-fee').sum(:amount)
+      paid = self.incomes.where(item: 'rent-fee').sum(:amount)
     end
   end
 
 
   def trans_balance()
+    all = self.bills.where(paid: true).count
+    paid = self.incomes.where(item: 'rent-fee').count
+    monthes = all * self.trans_pay_amount - paid + self.trans_pledge_amount
+    self.trans_monthly_price * monthes
 
-    in_amount = self.bills.where(in_or_out: true).where(paid: true).sum(:amount)
-    out_amount = self.bills.where(in_or_out: false).where(paid: true).sum(:amount)
-    in_amount - out_amount
   end
 
   def create_first_bill()
@@ -151,8 +149,9 @@ class Contract < ApplicationRecord
     count = self.incomes.where(item: 'renter-fee').where.not(tx_id: nil).count
     pay_count = self.bills.where(paid: true).count * self.trans_pay_amount
     return if count >= pay_count
+    return if count <= 0
 
-    pay_on = self.trans_begin_on + count.minutes
+    pay_on = self.trans_begin_on + count.monthes
     return if Date.current < pay_on
 
     ret = contract.transact_and_wait.release_rent_fee()
@@ -256,9 +255,10 @@ class Contract < ApplicationRecord
     event_abi = contract.abi.find {|a| a['name'] == 'RentFeeReleased'}
     event_inputs = event_abi['inputs'].map {|i| OpenStruct.new(i)}
 
-    block_height = self.incomes.where(item: 'rent-fee').order(cycle: :desc).first.try(:block_height)
+    block_height = self.incomes.where(item: 'rent-fee').order(cycle: :desc).first.try(:block_height) || '0x0'
+    block_height = "0x#{(block_height.to_i(16)+1).to_s(16)}"
     filter_id = contract.new_filter.rent_fee_released({
-      from_block: block_height || '0x0',
+      from_block: block_height,
       to_block: 'latest',
       address: self.chain_address,
       })
@@ -271,6 +271,7 @@ class Contract < ApplicationRecord
       log = transaction['result']['logs'].detect{ |item|
         item['topics'][0] == "0x92779d26a19837706a0aa9ad1d968b5cf152951b31c826299fcb6d2bde543cf7"
       }
+      
       return if log.nil?
       data = log['data']
     
@@ -290,7 +291,11 @@ class Contract < ApplicationRecord
       end
 
       amount = args[1]
-      income = self.incomes.build(user: self.owner, at: DateTime.current, tx_id: transaction_id, item: 'rent-fee', amount: amount, currency: currency.name, block_height: log['blockNumber'])
+      cycle = self.incomes.where(item: 'rent-fee').count
+      income = self.incomes.build(user: self.owner, at: DateTime.current, 
+                                  tx_id: transaction_id, item: 'rent-fee', 
+                                  amount: amount.to_f/(10 ** currency.decimals), currency: currency.name, 
+                                  block_height: log['blockNumber'], cycle: cycle)
       income.save!
     }
   end
@@ -335,26 +340,56 @@ class Contract < ApplicationRecord
     }
     return if log.nil?
     data = log['data']
-    
     args = $eth_decoder.decode_arguments(event_inputs, data)
 
     arbitrament_result = self.arbitrament_result
+
+    paid_event_abi = contract.abi.find {|a| a['name'] =='Paid'}
+    paid_event_inputs = paid_event_abi['inputs'].map {|i| OpenStruct.new(i)}
 
     unless arbitrament_result.present?
       arbitrament_result = self.build_arbitrament_result(owner_rate: args[0], renter_rate: args[1],
                                                          tx_id: transaction_id)
       arbitrament_result.save!
 
-      transaction = self.transactions.build(at: DateTime.current, 
-                                            content: "最终仲裁结果如下：房东:#{arbitrament_result.owner_rate}% #{arbitrament_result.owner_rate/100.0 * self.appeal.amount} #{self.currency.name}, 房客#{arbitrament_result.renter_rate}% #{arbitrament_result.renter_rate/100.0 * self.appeal.amount} #{self.currency.name}", 
-                              tx_id: transaction_id)
-      transaction.save!
+      self.transactions.build(at: DateTime.current, 
+                            content: "最终仲裁结果如下：房东:#{arbitrament_result.owner_rate}% #{arbitrament_result.owner_rate/100.0 * self.appeal.amount} #{self.currency.name}, 房客#{arbitrament_result.renter_rate}% #{arbitrament_result.renter_rate/100.0 * self.appeal.amount} #{self.currency.name}", 
+                              tx_id: transaction_id).save!
 
-      income = self.incomes.build(user: self.owner, at: DateTime.current, tx_id: transaction_id, item: 'arbitrament-fee', amount: self.appeal.amount * args[0]/1000.0, currency: self.currency.name)
-      income.save!
+      paid_events = transaction['result']['logs'].select{ |item|
+        item['topics'][0] == "0xdad97236b77394a5ee3dd23dd08678094ed216aa89031dd9dfae8d01b9226e89"
+      }
+      events = paid_events.map{ |item|
+        $eth_decoder.decode_arguments(paid_event_inputs, item['data'])
+      }
+      events.each{ |paid_event|
 
-      income = self.incomes.build(user: self.renter, at: DateTime.current, tx_id: transaction_id, item: 'arbitrament-fee', amount: self.appeal.amount * args[1]/1000.0, currency: self.currency.name)
-      income.save!
+        addr = "0x#{paid_event[0]}"
+        if self.owner.eth_wallet_address.downcase == addr
+          amount = paid_event[1].to_f/(10 ** self.currency.decimals)
+          self.incomes.build(user: self.owner, at: DateTime.current, tx_id: transaction_id, 
+                         item: 'arbitrament-fee', amount: amount, 
+                         currency: self.currency.name).save!
+        elsif self.renter.eth_wallet_address.downcase == addr
+          amount = paid_event[1].to_f/(10 ** self.currency.decimals)
+          self.incomes.build(user: self.renter, at: DateTime.current, tx_id: transaction_id, 
+                         item: 'arbitrament-fee', amount: amount, 
+                         currency: self.currency.name).save!
+        else
+          arbi = self.arbitrators.detect{ |ar| ar.eth_wallet_address.downcase == addr}
+          next if arbi.nil?
+          amount = paid_event[1].to_f/(10 ** self.currency.decimals)
+          self.incomes.build(user: arbi, at: DateTime.current, tx_id: transaction_id, 
+                         item: 'arbitrator-fee', amount: amount, 
+                         currency: self.currency.name).save!
+        end
+
+
+     } 
+      
+
+
+   
 
       self.arbitrate!
     end
@@ -589,6 +624,7 @@ class Contract < ApplicationRecord
   
   def deploy(factory)
     if self.chain_address.nil?
+
       ret = factory.transact_and_wait.new_rent_contract(ENV["RENT_CONFIG_ADDRESS"])
       if ret.mined
         tx_id = ret.id

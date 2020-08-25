@@ -44,7 +44,6 @@ class KycsController < ApplicationController
 
   def accept
 		kyc = Kyc.find(params[:id])
-    binding.pry
 		kyc.accept!
     redirect_to kycs_path, notice: '审核完成！'
 	end

@@ -4,7 +4,7 @@ class Income < ApplicationRecord
 
   def item_desc
     case self.item
-    when 'renter-fee'
+    when 'rent-fee'
       '房租'
     when 'promoter-fee'
       '中介费'

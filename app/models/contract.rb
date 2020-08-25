@@ -146,7 +146,7 @@ class Contract < ApplicationRecord
   end
 
   def release_rent_fee(contract)
-    count = self.incomes.where(item: 'renter-fee').where.not(tx_id: nil).count
+    count = self.incomes.where(item: 'rent-fee').where.not(tx_id: nil).count
     pay_count = self.bills.where(paid: true).count * self.trans_pay_amount.to_i
     return if count >= pay_count
     return if pay_count <= 0
@@ -157,6 +157,7 @@ class Contract < ApplicationRecord
     ret = contract.transact_and_wait.release_rent_fee()
     Rails.logger.error(ret)
     unless ret.mined
+      scan_rent_income(contract, ret.id)
       Rails.logger.error(ret)
     end
 
@@ -251,53 +252,49 @@ class Contract < ApplicationRecord
     income.save!
   end
 
-  def scan_rent_income(contract)
+  def scan_rent_income(contract, transaction_id)
     event_abi = contract.abi.find {|a| a['name'] == 'RentFeeReleased'}
     event_inputs = event_abi['inputs'].map {|i| OpenStruct.new(i)}
 
-    block_height = self.incomes.where(item: 'rent-fee').order(cycle: :desc).first.try(:block_height) || '0x0'
-    block_height = "0x#{(block_height.to_i(16)+1).to_s(16)}"
-    filter_id = contract.new_filter.rent_fee_released({
-      from_block: block_height,
-      to_block: 'latest',
-      address: self.chain_address,
+    if transaction_id.nil?
+      block_height = self.incomes.where(item: 'rent-fee').order(cycle: :desc).first.try(:block_height) || '0x0'
+      block_height = "0x#{(block_height.to_i(16)+1).to_s(16)}"
+      filter_id = contract.new_filter.rent_fee_released({
+        from_block: block_height,
+        to_block: 'latest',
+        address: self.chain_address,
       })
-    events = contract.get_filter_logs.rent_fee_released(filter_id)
+      events = contract.get_filter_logs.rent_fee_released(filter_id)
+      return if events.empty?
+      transaction_id = events[0][:transactionHash]
+    end
 
-    events.each { |event|
-      transaction_id = event[:transactionHash]
-      transaction = $eth_client.eth_get_transaction_receipt(transaction_id)
-
-      log = transaction['result']['logs'].detect{ |item|
-        item['topics'][0] == "0x92779d26a19837706a0aa9ad1d968b5cf152951b31c826299fcb6d2bde543cf7"
-      }
-      
-      return if log.nil?
-      data = log['data']
-    
-      args = $eth_decoder.decode_arguments(event_inputs, data)
-
-      address = args[0]
-      ##fix me
-      unless same_address? self.owner.eth_wallet_address, address
-        Rails.logger.error("contranct owner address:#{self.owner.eth_wallet_address} not same as contract event:#{address}")
-        return
-      end
-      tokenAddr = args[2]
-      currency = Currency.where("addr like '%#{tokenAddr}%'").first
-      if currency.nil?
-        Rails.logger.error("contract token addr invalid:#{tokenAddr}")
-        return
-      end
-
-      amount = args[1]
-      cycle = self.incomes.where(item: 'rent-fee').count
-      income = self.incomes.build(user: self.owner, at: DateTime.current, 
-                                  tx_id: transaction_id, item: 'rent-fee', 
-                                  amount: amount.to_f/(10 ** currency.decimals), currency: currency.name, 
-                                  block_height: log['blockNumber'], cycle: cycle)
-      income.save!
+    transaction = $eth_client.eth_get_transaction_receipt(transaction_id)
+    log = transaction['result']['logs'].detect{ |item|
+      item['topics'][0] == "0x92779d26a19837706a0aa9ad1d968b5cf152951b31c826299fcb6d2bde543cf7"
     }
+      
+    return if log.nil?
+
+    data = log['data']
+    
+    args = $eth_decoder.decode_arguments(event_inputs, data)
+
+    address = args[0]
+    ##fix me
+    unless same_address? self.owner.eth_wallet_address, address
+      Rails.logger.error("contranct owner address:#{self.owner.eth_wallet_address} not same as contract event:#{address}")
+      return
+    end
+    tokenAddr = args[2]
+    amount = args[1]
+    cycle = self.incomes.where(item: 'rent-fee').count
+    income = self.incomes.build(user: self.owner, at: DateTime.current, 
+                                tx_id: transaction_id, item: 'rent-fee', 
+                                amount: amount.to_f/(10 ** self.currency.decimals), currency: self.currency.name, 
+                                block_height: log['blockNumber'], cycle: cycle)
+    income.save!
+
   end
 
 
@@ -311,7 +308,9 @@ class Contract < ApplicationRecord
 
     scan_promoter_income(contract)
     scan_pledge_income(contract)
-    scan_rent_income(contract)
+    scan_pledge_income(contract)
+    scan_rent_income(contract, nil)
+
     release_rent_fee(contract)
   end
  

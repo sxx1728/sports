@@ -115,8 +115,8 @@ class Contract < ApplicationRecord
     else
       all = self.bills.where(paid: true).count
       paid = self.incomes.where(item: 'rent-fee').count
-      monthes = all * self.trans_pay_amount - paid
-      self.trans_monthly_price * monthes
+      months = all * self.trans_pay_amount - paid
+      self.trans_monthly_price * months
     end
   end
 
@@ -132,8 +132,8 @@ class Contract < ApplicationRecord
   def trans_balance()
     all = self.bills.where(paid: true).count
     paid = self.incomes.where(item: 'rent-fee').count
-    monthes = all * self.trans_pay_amount - paid + self.trans_pledge_amount
-    self.trans_monthly_price * monthes
+    months = all * self.trans_pay_amount - paid + self.trans_pledge_amount
+    self.trans_monthly_price * months
 
   end
 
@@ -147,15 +147,17 @@ class Contract < ApplicationRecord
 
   def release_rent_fee(contract)
     count = self.incomes.where(item: 'renter-fee').where.not(tx_id: nil).count
-    pay_count = self.bills.where(paid: true).count * self.trans_pay_amount
+    pay_count = self.bills.where(paid: true).count * self.trans_pay_amount.to_i
     return if count >= pay_count
-    return if count <= 0
+    return if pay_count <= 0
 
-    pay_on = self.trans_begin_on + count.monthes
-    return if Date.current < pay_on
+    pay_on = self.trans_begin_on + count.months
+    binding.pry
+    return if Date.current <= pay_on
 
     ret = contract.transact_and_wait.release_rent_fee()
     Rails.logger.error(ret)
+    binding.pry
     unless ret.mined
       Rails.logger.error(ret)
     end

@@ -152,12 +152,10 @@ class Contract < ApplicationRecord
     return if pay_count <= 0
 
     pay_on = self.trans_begin_on + count.months
-    binding.pry
     return if Date.current <= pay_on
 
     ret = contract.transact_and_wait.release_rent_fee()
     Rails.logger.error(ret)
-    binding.pry
     unless ret.mined
       Rails.logger.error(ret)
     end

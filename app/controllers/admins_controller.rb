@@ -31,7 +31,7 @@ class AdminsController < ApplicationController
   before_action :authorize_ability
 
   def authorize_ability
-    authorize! :manage, Role
+    authorize! :manage, Admin
   end
 
   def index

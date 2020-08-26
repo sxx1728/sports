@@ -12,8 +12,11 @@ class Ability
       can :manage, User
       can :manage, Kyc
     elsif user.has_role? 'operator'
+      can :manage, Admin
+      can :manage, ChainlyConfig
       can :manage, User
       can :manage, Kyc
+ 
     end
 
     # Define abilities for the passed in user here. For example:

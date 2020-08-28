@@ -2,28 +2,42 @@
   .container-fluid
     .row.mb-2
       .col-sm-6
-        %h1 币种列表
+        %h1 推广人列表
       .col-sm-6 
         %ol.breadcrumb.float-sm-right
-          %li.breadcrumb-item 币种管理
+          %li.breadcrumb-item 推广人管理
           %li.breadcrumb-item.active 列表
 
 %section.content
-  .card.p-0
-    %table.table.table-bordered
-      %tbody
-        %tr
-          %th 币种名称
-          %th 币种合约地址
-          %th 币种精度
-        - @coins.each do |coin|
+  .card
+    .p-0
+      %table.table.table-bordered
+        %tbody
           %tr
-            %td 
-              = coin.name
-            %td{style: "text-overflow = ellipsis;max-width: 100px;overflow: hidden;white-space: nowrap;resize: horizontal;"}
-              = coin.addr
-            %td 
-              = coin.decimals
-            %td 
-              = link_to(raw('<i class="far fa-trash-alt">&nbsp;</i>'), coin_path(coin), data: { confirm: '确定要删除该房间吗?'}, method: :delete )
+            %th ID
+            %th 昵称
+            %th 推广码
+            %th 有效
+            %th 操作
+          - @users.each do |user|
+            %tr
+              %td 
+                = user.id
+              %td
+                = user.nick_name
+              %td
+                = user.promoter_code.try(:code)
+              %td 
+                = brac_boolean(user.promoter_code.try(:enabled))
+              %td 
+                - if user.promoter_code.nil?
+                  = link_to('生成推广码', gen_code_user_path(user), method: :patch)
+                - if user.promoter_code.present? and user.promoter_code.enabled
+                  = link_to('禁止推广', disable_code_user_path(user), method: :patch)
+                - else
+                  = link_to('开启推广', enable_code_user_path(user), method: :patch)
+
+    .card-footer.clearfix
+      %ul.pagination.pagination-sm.m-0.float-right
+        = will_paginate @users, :container => false
 

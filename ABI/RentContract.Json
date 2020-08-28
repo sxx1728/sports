@@ -409,6 +409,19 @@
     },
     {
       "inputs": [],
+      "name": "payCycle",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
       "name": "payPeriod",
       "outputs": [
         {
@@ -448,7 +461,7 @@
     },
     {
       "inputs": [],
-      "name": "platformFeeRate",
+      "name": "platformFee",
       "outputs": [
         {
           "internalType": "uint256",
@@ -664,6 +677,11 @@
         },
         {
           "internalType": "uint256",
+          "name": "_platformFee",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
           "name": "_monthlyRentFee",
           "type": "uint256"
         },
@@ -711,7 +729,7 @@
         },
         {
           "internalType": "uint256",
-          "name": "platformFee",
+          "name": "_platformFee",
           "type": "uint256"
         },
         {
@@ -885,6 +903,3 @@
       "type": "function"
     }
   ]
-
-
-

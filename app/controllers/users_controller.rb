@@ -34,7 +34,46 @@ class UsersController < ApplicationController
 
   def index
     session['func'] = params[:func]
-    @users = User.all
+    session['func_index'] = params[:func_index]
+    @users = Promoter::User.all.paginate page: params[:page], per_page: 10
   end
+
+  def gen_code
+		user = Promoter::User.find(params[:id])
+    code = 10000 + rand(90000)
+    while PromoterUser.exist?(code: code) do
+      code = 10000 + rand(90000)
+    end
+
+    user.promoter_user.build(code: code, enabled: true).save!
+    redirect_to users_path, notice: '生成成功！'
+	end
+
+  def enable_code
+		user = Promoter::User.find(params[:id])
+    user.promoter_code.update!(enabled: true)
+    redirect_to users_path, notice: '使能成功！'
+	end
+
+  def disable_code
+		user = Promoter::User.find(params[:id])
+    user.promoter_code.update!(enabled: false)
+    redirect_to users_path, notice: '关闭成功！'
+	end
+
+  def gen_code
+		user = Promoter::User.find(params[:id])
+    code = 100000 + rand(900000)
+    while PromoterCode.exists?(code: code) do
+      code = 100000 + rand(900000)
+    end
+
+    user.build_promoter_code(code: code, enabled: true).save!
+    redirect_to users_path, notice: '生成成功！'
+	end
+
+
+
+
 
 end

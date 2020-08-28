@@ -15,7 +15,14 @@ Rails.application.routes.draw do
 
   resources :chainly_configs
 
-  resources :users
+  resources :users do
+    member do
+      patch :gen_code
+      patch :enable_code
+      patch :disable_code
+    end
+  end
+ 
   resources :kycs do
     member do
       patch :accept

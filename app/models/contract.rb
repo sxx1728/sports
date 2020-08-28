@@ -659,12 +659,13 @@ class Contract < ApplicationRecord
         self.id.to_s,
         self.owner.eth_wallet_address,
         self.renter.eth_wallet_address,
-        self.promoter.try(:eth_wallet_address) || ENV['RENT_ADMIN_ADDRESS'],#null promoter set the admin address
+        self.promoter.try(:eth_wallet_address) || '0x0000000000000000000000000000000000000000',#null promoter set the admin address
         self.currency.addr,
         (self.trans_monthly_price * (10 ** self.currency.decimals) * self.trans_pay_amount).to_i,
         (self.trans_period / self.trans_pay_amount).to_i,
         (self.trans_monthly_price * (10 ** self.currency.decimals) * self.trans_pledge_amount).to_i,
-        (self.trans_monthly_price * (10 ** self.currency.decimals) * self.trans_agency_fee_rate).to_i,
+        (self.trans_monthly_price * (10 ** self.currency.decimals) * self.trans_agency_fee_rate / 100).to_i,
+        (self.trans_monthly_price * (10 ** self.currency.decimals) * self.trans_platform_fee_rate / 100).to_i,
         (self.trans_monthly_price * (10 ** self.currency.decimals)).to_i,
         self.trans_begin_on.to_s,
         self.trans_end_on.to_s,
@@ -732,7 +733,7 @@ class Contract < ApplicationRecord
 
   def state_desc user
     case self.state
-    when 'running', 'broken', 'arbitrating', 'finished', 'canceled'
+    when 'running', 'broken', 'arbitrating', 'finished', 'canceled', 'arbitrated'
       return self.state
     when 'unsigned', 'renter_signed', 'owner_signed'
       return 'unsigned'

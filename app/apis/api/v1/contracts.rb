@@ -201,15 +201,21 @@ module API
                                        trans_end_on: trans[:end_on])
 
             if trans[:coupon_code].present?
-              coupon = PromoterCode.where(code: trans[:coupon_code]).first
+              coupon = PromoterCode.where(code: trans[:coupon_code], enabled: true).first
               app_error('优惠券无效') if coupon.nil?
-              contract.trans_platform_fee_rate_origin = 0.01;
-              contract.trans_platform_fee_rate = contract.trans_platform_fee_rate_origin - 0.002;
-              contract.trans_agency_fee_rate = 0.02;
+              if promoter.present?
+                app_error('优惠券与推广人不匹配')  and promoter.id != coupon.user_id
+              else
+                promoter = coupon.user
+              end
+
+              contract.trans_platform_fee_rate_origin = ChainlyConfig.first.platform_fee_rate;
+              contract.trans_platform_fee_rate = ChainlyConfig.first.platform_fee_rate * 0.5;
+              contract.trans_agency_fee_rate = ChainlyConfig.first.platform_fee_rate * 0.5;
             else
-              contract.trans_platform_fee_rate_origin = 0.01;
-              contract.trans_platform_fee_rate = contract.trans_platform_fee_rate_origin;
-              contract.trans_agency_fee_rate = 0.02;
+              contract.trans_platform_fee_rate_origin = ChainlyConfig.first.platform_fee_rate;
+              contract.trans_platform_fee_rate = ChainlyConfig.first.platform_fee_rate;
+              contract.trans_agency_fee_rate = 0;
             end
 
             contract.renter = renter;

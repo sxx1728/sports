@@ -17,7 +17,7 @@ module API
             contract = Contract.find params[:contract_id] rescue nil
             app_error('无效合同id') if contract.nil?
 
-            app_error('无权限查看') unless (contract.arbitrators.include?(user) || contract.renter == user || contract.owner == user)
+            app_error('无权限查看') unless (contract.arbitrators.include?(user) || contract.renter == user || contract.owner == user || contract.promoter == user)
 
             present :state, contract.state
             present :result, contract.arbitrament_result, with: API::V1::Entities::ArbitramentResult

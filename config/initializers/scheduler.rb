@@ -15,7 +15,7 @@ s.every('30s', overlap: false){
     Rails.logger.info('Deploying')
     contract.deploy(contract_factory)
   }
-  Contract.where(state: 'running').where(pdf: nil).each{ |contract|
+  Contract.where(pdf: nil).each{ |contract|
     contract.generate_pdf()
   }
  

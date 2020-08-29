@@ -91,6 +91,7 @@ class Contract < ApplicationRecord
   def generate_pdf()
     Rails.logger.info('begin generate')
     pdf = WickedPdf.new.pdf_from_string('<h1>Hello There!</h1>')
+    Rails.logger.info(pdf)
     tmp_path = Rails.root.join('tmp','contract.pdf')
     Rails.logger.info(tmp_path)
     File.open(tmp_path, 'wb') do |file|

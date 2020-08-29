@@ -367,6 +367,8 @@ GEM
     websocket-driver (0.7.2)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.4)
+    wicked_pdf (2.1.0)
+      activesupport
     will_paginate (3.1.8)
     will_paginate-bootstrap (1.0.2)
       will_paginate (>= 3.0.3)
@@ -405,6 +407,7 @@ DEPENDENCIES
   http (= 4.1.1)
   jwt
   listen (>= 3.0.5, < 3.2)
+  mini_magick
   pry-nav
   pry_debug
   puma (= 3.12.1)
@@ -423,6 +426,7 @@ DEPENDENCIES
   web-console (>= 3.3.0)
   webdrivers
   webpacker (= 4.0.7)
+  wicked_pdf
   will_paginate (~> 3.1.7)
   will_paginate-bootstrap (~> 1.0.2)
 

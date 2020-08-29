@@ -74,6 +74,9 @@ module API
             false
           end
         end
+        expose :pdf do |m,o|
+          m.pdf_url rescue nil
+        end
       end
     end
   end

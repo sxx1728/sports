@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_22_162200) do
+ActiveRecord::Schema.define(version: 2020_08_29_093340) do
 
   create_table "admins", force: :cascade do |t|
     t.string "email", limit: 128, default: "", null: false
@@ -161,6 +161,7 @@ ActiveRecord::Schema.define(version: 2020_08_22_162200) do
     t.integer "currency_id"
     t.decimal "trans_pay_amount"
     t.decimal "trans_platform_fee_rate", precision: 20, scale: 8
+    t.string "pdf"
     t.index ["owner_id"], name: "index_contracts_on_owner_id"
     t.index ["promoter_id"], name: "index_contracts_on_promoter_id"
     t.index ["renter_id"], name: "index_contracts_on_renter_id"

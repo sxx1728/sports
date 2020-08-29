@@ -19,6 +19,8 @@ class Contract < ApplicationRecord
 
   has_many :arbitraments, class_name: "::ContractsUser"
 
+  mount_uploader :pdf, PdfUploader
+
   include AASM
   aasm column: 'state' do
     state :unsigned, initial: true
@@ -85,6 +87,22 @@ class Contract < ApplicationRecord
  
  
   end
+
+  def generate_pdf()
+    pdf = WickedPdf.new.pdf_from_string('<h1>Hello There!</h1>')
+    tmp_path = Rails.root.join('tmp','contract.pdf')
+    File.open(tmp_path, 'wb') do |file|
+      file << pdf
+    end
+    
+    File.open(tmp_path) do |file|
+      self.pdf = file
+    end
+
+    self.save!
+
+  end
+
 
   def balance_unpaid()
     if ['unsigned', 'renter_signed', 'owner_signed', 'canceled', 'rejected', 'broken'].include?(self.state)
@@ -636,6 +654,7 @@ class Contract < ApplicationRecord
       event_inputs = event_abi['inputs'].map {|i| OpenStruct.new(i)}
 
       transaction = $eth_client.eth_get_transaction_receipt(tx_id)
+      binding.pry
 
       data = transaction['result']['logs'][0]['data'] rescue nil
       unless data.present?
@@ -664,14 +683,15 @@ class Contract < ApplicationRecord
         (self.trans_monthly_price * (10 ** self.currency.decimals) * self.trans_pay_amount).to_i,
         (self.trans_period / self.trans_pay_amount).to_i,
         (self.trans_monthly_price * (10 ** self.currency.decimals) * self.trans_pledge_amount).to_i,
-        (self.trans_monthly_price * (10 ** self.currency.decimals) * self.trans_agency_fee_rate / 100).to_i,
-        (self.trans_monthly_price * (10 ** self.currency.decimals) * self.trans_platform_fee_rate / 100).to_i,
+        (self.trans_monthly_price * (10 ** self.currency.decimals) * self.trans_agency_fee_rate).to_i,
+        (self.trans_monthly_price * (10 ** self.currency.decimals) * self.trans_platform_fee_rate).to_i,
         (self.trans_monthly_price * (10 ** self.currency.decimals)).to_i,
         self.trans_begin_on.to_s,
         self.trans_end_on.to_s,
         "押#{self.trans_pledge_amount.to_i}付#{self.trans_pay_amount.to_i}",
         self.arbitrators.map(&:eth_wallet_address))
 
+      binding.pry
       Rails.logger.error(ret)
       if ret.mined
         self.update!(initialized: true)

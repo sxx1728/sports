@@ -31,7 +31,7 @@ module ApplicationHelper
     versioned_image = options[:version] ? image.send(options[:version]) : image
     css_class = ['img-rounded', 'img-responsive'] << options[:class]
     if versioned_image.try(:url).present?
-      link_to image_tag(versioned_image.url, class: css_class.flatten.join(' ')), versioned_image.url, target: '_blank'
+      link_to image_tag(versioned_image.url, class: css_class.flatten.join(' ')), image.url, target: '_blank'
     else
       image_tag('avatar.png', class: 'img-rounded '+css_class.flatten.join(' '))
     end

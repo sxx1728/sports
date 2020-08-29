@@ -149,19 +149,22 @@ module API
             promoter = User.from_token params[:token]
             app_error('无效Token', 401) if promoter.nil?
             app_error('无权创建合同') unless ['Promoter::User', 'Owner::User'].include?(promoter.type)
-            app_error('中介钱包地址不能为空 ') if promoter.eth_wallet_address.nil?
+            app_error('推广人钱包地址不能为空 ') if promoter.eth_wallet_address.nil?
 
             renter = Renter::User.find(params[:renter_id]) rescue nil
             app_error('无效房客ID') if renter.nil?
             app_error('租客钱包地址不能为空 ') if renter.eth_wallet_address.nil?
+            app_error('租客没有通过实名认证') if renter.kyc.nil? or not renter.kyc.accepted?
 
             owner = Owner::User.find(params[:owner_id]) rescue nil
             app_error('无效房东ID') if owner.nil?
             app_error('房东钱包地址不能为空 ') if owner.eth_wallet_address.nil?
+            app_error('房东没有通过实名认证') if owner.kyc.nil? or not owner.kyc.accepted?
 
             if owner == promoter
                 promoter = nil
             end
+            app_error('推广人没有通过实名认证') if promoter.present? and (promoter.kyc.nil? or not promoter.kyc.accepted?)
 
             room = params[:room]
             trans = params[:trans]
@@ -209,21 +212,21 @@ module API
                 promoter = coupon.user
               end
 
-              contract.trans_platform_fee_rate_origin = ChainlyConfig.first.platform_fee_rate;
-              contract.trans_platform_fee_rate = ChainlyConfig.first.platform_fee_rate * 0.5;
-              contract.trans_agency_fee_rate = ChainlyConfig.first.platform_fee_rate * 0.5;
+              contract.trans_platform_fee_rate_origin = ChainlyConfig.first.platform_fee_rate / 1000
+              contract.trans_platform_fee_rate = ChainlyConfig.first.platform_fee_rate / 1000 * 0.5
+              contract.trans_agency_fee_rate = ChainlyConfig.first.platform_fee_rate / 1000 * 0.5
             else
-              contract.trans_platform_fee_rate_origin = ChainlyConfig.first.platform_fee_rate;
-              contract.trans_platform_fee_rate = ChainlyConfig.first.platform_fee_rate;
-              contract.trans_agency_fee_rate = 0;
+              contract.trans_platform_fee_rate_origin = ChainlyConfig.first.platform_fee_rate / 1000
+              contract.trans_platform_fee_rate = ChainlyConfig.first.platform_fee_rate / 1000
+              contract.trans_agency_fee_rate = 0
             end
 
-            contract.renter = renter;
-            contract.owner = owner;
-            contract.promoter = promoter;
+            contract.renter = renter
+            contract.owner = owner
+            contract.promoter = promoter
 
-            contract.arbitrators = arbitrators;
-            contract.currency = currency;
+            contract.arbitrators = arbitrators
+            contract.currency = currency
 
             contract.save!
 

@@ -8,18 +8,20 @@ s = Rufus::Scheduler.singleton
 
 contract_factory = Contract.build_contract_factory
 
-s.every('30s', overlap: false){
+s.every('10d', overlap: false){
 
   
   Contract.where(state: 'running').where(initialized: false).each{ |contract|
     Rails.logger.info('Deploying')
     contract.deploy(contract_factory)
-    #contract.save_word()
   }
-
+  Contract.where(state: 'running').where(pdf: nil).each{ |contract|
+    contract.generate_pdf()
+  }
+ 
  
   Contract.where(state: 'running').where(initialized: true).each{ |contract|
-    
+
     #scan bill
     
     bill_count = contract.bills.count

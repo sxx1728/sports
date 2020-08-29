@@ -34,9 +34,9 @@
               %td{style: "text-overflow = ellipsis;max-width: 150px;overflow: hidden;white-space: nowrap;resize: horizontal;"}
                 = kyc.id_no
               %td{style: "text-overflow = ellipsis;max-width: 250px;overflow: hidden;white-space: nowrap;resize: horizontal;"}
-                = brac_image(kyc.front_img.try(:file))
+                = brac_image(kyc.front_img.try(:file), version: :thumb)
               %td{style: "text-overflow = ellipsis;max-width: 250px;overflow: hidden;white-space: nowrap;resize: horizontal;"}
-                = brac_image(kyc.back_img.try(:file))
+                = brac_image(kyc.back_img.try(:file), version: :thumb)
               %td 
                 = kyc.state_desc
               %td 

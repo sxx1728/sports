@@ -89,15 +89,19 @@ class Contract < ApplicationRecord
   end
 
   def generate_pdf()
+    Rails.logger.info('begin generate')
     pdf = WickedPdf.new.pdf_from_string('<h1>Hello There!</h1>')
     tmp_path = Rails.root.join('tmp','contract.pdf')
+    Rails.logger.info(tmp_path)
     File.open(tmp_path, 'wb') do |file|
       file << pdf
     end
     
+    Rails.logger.info('generated')
     File.open(tmp_path) do |file|
       self.pdf = file
     end
+    Rails.logger.info('before save')
 
     self.save!
 

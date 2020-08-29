@@ -3,9 +3,8 @@ module API
     module Entities
       class Kyc < Grape::Entity
         include API::Helpers
-        expose :status do |m, o|
-          m.state rescue 'none'
-        end
+        expose :state 
+        expose :state_desc 
         expose :name do |m, o|
           m.name rescue nil
         end

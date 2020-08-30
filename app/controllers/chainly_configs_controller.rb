@@ -46,7 +46,7 @@ class ChainlyConfigsController < ApplicationController
       config_contract = Contract.build_config_contract
       ret = config_contract.transact_and_wait.update_fee_rate(
         @chainly_config.platform_fee_rate,
-        @chainly_config.promoter_fee_rate,
+        0,
         @chainly_config.arbitration_fee_rate
       )
 

@@ -9,14 +9,16 @@ module API
           end
           post do
 
-            app_error('无效电话', 'invalid phone') unless Captcha.valid_phone? params[:phone]
+            app_error('无效电话' ) unless Captcha.valid_phone? params[:phone]
+            captcha = Captcha.where(phone: params[:phone]).last
+            app_error('发送频繁，请稍候调用') if captcha.present? and captcha.created_at + 30.seconds > DateTime.current
 
             captcha = Captcha.where(phone: params[:phone]).where("expire_at > ?", DateTime.current).last
-            if captcha.present?
-              present 'succeed'
+
+            unless captcha.present?
+              captcha = Captcha.create(phone: params[:phone])
             end
-            captcha = Captcha.create(phone: params[:phone])
-            present 'succeed'
+            present captcha.send
           end
 
         end

@@ -203,21 +203,20 @@ module API
                                        trans_begin_on: trans[:begin_on],
                                        trans_end_on: trans[:end_on])
 
-            if trans[:coupon_code].present?
-              coupon = PromoterCode.where(code: trans[:coupon_code], enabled: true).first
-              app_error('优惠券无效') if coupon.nil?
-              if promoter.present?
-                app_error('优惠券与推广人不匹配')  and promoter.id != coupon.user_id
-              else
+            if promoter.nil? and trans[:coupon_code].present?
+                coupon = PromoterCode.where(code: trans[:coupon_code], enabled: true).first
+                app_error('优惠券无效') if coupon.nil?
                 promoter = coupon.user
-              end
+            end
 
-              contract.trans_platform_fee_rate_origin = ChainlyConfig.first.platform_fee_rate / 1000
-              contract.trans_platform_fee_rate = ChainlyConfig.first.platform_fee_rate / 1000 * 0.5
-              contract.trans_agency_fee_rate = ChainlyConfig.first.platform_fee_rate / 1000 * 0.5
+            binding.pry
+            if promoter.present?
+              contract.trans_platform_fee_rate_origin = ChainlyConfig.first.platform_fee_rate.to_f / 1000
+              contract.trans_platform_fee_rate = ChainlyConfig.first.platform_fee_rate.to_f / 1000 * 0.5
+              contract.trans_agency_fee_rate = ChainlyConfig.first.platform_fee_rate.to_f / 1000 * 0.5
             else
-              contract.trans_platform_fee_rate_origin = ChainlyConfig.first.platform_fee_rate / 1000
-              contract.trans_platform_fee_rate = ChainlyConfig.first.platform_fee_rate / 1000
+              contract.trans_platform_fee_rate_origin = ChainlyConfig.first.platform_fee_rate.to_f / 1000
+              contract.trans_platform_fee_rate = ChainlyConfig.first.platform_fee_rate.to_f / 1000
               contract.trans_agency_fee_rate = 0
             end
 
@@ -230,8 +229,6 @@ module API
 
             contract.save!
 
-
-            
             present contract.id
           end
 

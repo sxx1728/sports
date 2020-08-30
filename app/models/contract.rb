@@ -220,10 +220,10 @@ class Contract < ApplicationRecord
       Rails.logger.error("contranct promoter address:#{self.promoter.eth_wallet_address} not same as contract event:#{address}")
       return
     end
-    tokenAddr = args[2]
-    currency = Currency.where(addr: tokenAddr).first
+    token_addr = args[2]
+    currency = Currency.where("addr like '%#{token_addr}'").first
     if currency.nil?
-      Rails.logger.error("contract token addr invalid:#{tokenAddr}")
+      Rails.logger.error("contract token addr invalid:#{token_addr}")
       return
     end
 
@@ -263,10 +263,10 @@ class Contract < ApplicationRecord
       Rails.logger.error("contranct renter address:#{self.promoter.eth_wallet_address} not same as contract event:#{address}")
       return
     end
-    tokenAddr = args[2]
-    currency = Currency.where(addr: tokenAddr).first
+    token_addr = args[2]
+    currency = Currency.where(addr: token_addr).first
     if currency.nil?
-      Rails.logger.error("contract token addr invalid:#{tokenAddr}")
+      Rails.logger.error("contract token addr invalid:#{token_addr}")
       return
     end
 
@@ -309,7 +309,7 @@ class Contract < ApplicationRecord
       Rails.logger.error("contranct owner address:#{self.owner.eth_wallet_address} not same as contract event:#{address}")
       return
     end
-    tokenAddr = args[2]
+    token_addr = args[2]
     amount = args[1]
     cycle = self.incomes.where(item: 'rent-fee').count
     income = self.incomes.build(user: self.owner, at: DateTime.current, 
@@ -330,7 +330,6 @@ class Contract < ApplicationRecord
     contract = self.build_chainly_contract
 
     scan_promoter_income(contract)
-    scan_pledge_income(contract)
     scan_pledge_income(contract)
     scan_rent_income(contract, nil)
 
@@ -659,7 +658,6 @@ class Contract < ApplicationRecord
       event_inputs = event_abi['inputs'].map {|i| OpenStruct.new(i)}
 
       transaction = $eth_client.eth_get_transaction_receipt(tx_id)
-      binding.pry
 
       data = transaction['result']['logs'][0]['data'] rescue nil
       unless data.present?
@@ -683,7 +681,7 @@ class Contract < ApplicationRecord
         self.id.to_s,
         self.owner.eth_wallet_address,
         self.renter.eth_wallet_address,
-        self.promoter.try(:eth_wallet_address) || '0x0000000000000000000000000000000000000000',#null promoter set the admin address
+        self.promoter.eth_wallet_address || '0x0000000000000000000000000000000000000000',#null promoter set the admin address
         self.currency.addr,
         (self.trans_monthly_price * (10 ** self.currency.decimals) * self.trans_pay_amount).to_i,
         (self.trans_period / self.trans_pay_amount).to_i,
@@ -696,7 +694,6 @@ class Contract < ApplicationRecord
         "押#{self.trans_pledge_amount.to_i}付#{self.trans_pay_amount.to_i}",
         self.arbitrators.map(&:eth_wallet_address))
 
-      binding.pry
       Rails.logger.error(ret)
       if ret.mined
         self.update!(initialized: true)

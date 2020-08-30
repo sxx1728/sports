@@ -18,7 +18,7 @@ module API
             unless captcha.present?
               captcha = Captcha.create(phone: params[:phone])
             end
-            present captcha.send
+            present captcha.send_sms
           end
 
         end

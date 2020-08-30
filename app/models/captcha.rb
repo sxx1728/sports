@@ -22,5 +22,23 @@ class Captcha < ApplicationRecord
   end
   
 
+  def send_sms
+    response = $sms_client.request(
+      action: 'SendSms',
+      params: {
+        "RegionId": "cn-hangzhou",
+        "PhoneNumbers": "#{self.phone}",
+        "SignName": "链租科技",
+        "TemplateCode": "SMS_200693023",
+        "TemplateParam": "{'code': '#{self.captcha}'}"
+      },
+      opts: {
+        method: 'POST'
+      }
+    )
+    
+    response['Code']
+  end
+
 
 end

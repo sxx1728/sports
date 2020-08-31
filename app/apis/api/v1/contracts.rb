@@ -211,7 +211,6 @@ module API
                 promoter = coupon.user
             end
 
-            binding.pry
             if promoter.present?
               contract.trans_platform_fee_rate_origin = ChainlyConfig.first.platform_fee_rate.to_f / 1000
               contract.trans_platform_fee_rate = ChainlyConfig.first.platform_fee_rate.to_f / 1000 * 0.5

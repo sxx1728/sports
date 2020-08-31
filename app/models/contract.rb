@@ -775,7 +775,9 @@ class Contract < ApplicationRecord
       else
         return 'none'
       end
-    else 
+    when 'arbitrated'
+      return 'finished'
+    else
       return 'none'
     end
 

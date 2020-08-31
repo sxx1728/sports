@@ -36,6 +36,8 @@ module API
               end
             when 'running', 'broken', 'arbitrating', 'finished', 'canceled'
               contracts = contracts.where(state: params[:state])
+            when 'finished'
+              contracts = contracts.where(state: ['finished', 'arbitrated'])
             when 'unsigned'
               contracts = contracts.where(state: ['unsigned', 'renter_signed', 'owner_signed'])
             when 'appealed'

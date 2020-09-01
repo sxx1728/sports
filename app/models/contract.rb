@@ -681,7 +681,7 @@ class Contract < ApplicationRecord
         self.id.to_s,
         self.owner.eth_wallet_address,
         self.renter.eth_wallet_address,
-        self.promoter.eth_wallet_address || '0x0000000000000000000000000000000000000000',#null promoter set the admin address
+        self.promoter.try(:eth_wallet_address) || '0x0000000000000000000000000000000000000000',#null promoter set the admin address
         self.currency.addr,
         (self.trans_monthly_price * (10 ** self.currency.decimals) * self.trans_pay_amount).to_i,
         (self.trans_period / self.trans_pay_amount).to_i,

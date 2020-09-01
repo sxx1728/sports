@@ -350,6 +350,7 @@ class Contract < ApplicationRecord
       })
     events = contract.get_filter_logs.arbitration_result_generated(filter_id)
 
+    binding.pry
     return if events.count != 1
 
     event = events[0]
@@ -406,12 +407,8 @@ class Contract < ApplicationRecord
         end
 
 
-     } 
+      } 
       
-
-
-   
-
       self.arbitrate!
     end
   end
@@ -618,7 +615,7 @@ class Contract < ApplicationRecord
         next
       end
 
-      bill.update!(paid: true, tx_id: transaction_id)
+      bill.update!(paid: true, tx_id: transaction_id, pay_at: DateTime.current)
       transaction = self.transactions.build(at: DateTime.current, 
                                             content: "#{self.renter.desc} 支付#{bill.item}, 金额:#{amount} #{self.currency.name}", 
                               tx_id: transaction_id)
@@ -632,7 +629,6 @@ class Contract < ApplicationRecord
         next_bill = self.bills.build(item: "房租x#{pay_amount}", 
                                    amount: self.trans_monthly_price * pay_amount,
                                    paid: false, pay_cycle: pay_cycle + 1, 
-                                   pay_at: DateTime.current,
                                    block_height: log['blockNumber'])
         next_bill.save!
       end

@@ -32,6 +32,7 @@ module API
             if params[:eth_wallet_address].present?
               app_error('无效eth_wallet_address长度') unless params[:eth_wallet_address].length == 42
               app_error('无效eth_wallet_address，前缀0x') unless params[:eth_wallet_address][0..1] == '0x'
+              app_error('eth_wallet_address重复，请使用其他地址') if User.where(eth_wallet_address: params[:eth_wallet_address]).exists? 
               #app_error('无法修改ETH钱包地址') if user.eth_wallet_address.present?
               user.update!(eth_wallet_address: params[:eth_wallet_address])
             end

@@ -350,7 +350,6 @@ class Contract < ApplicationRecord
       })
     events = contract.get_filter_logs.arbitration_result_generated(filter_id)
 
-    binding.pry
     return if events.count != 1
 
     event = events[0]

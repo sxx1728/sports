@@ -8,7 +8,7 @@ s = Rufus::Scheduler.singleton
 
 contract_factory = Contract.build_contract_factory
 
-s.every('30d', overlap: false){
+s.every('30s', overlap: false){
 
   
   Contract.where(state: 'running').where(initialized: false).each{ |contract|

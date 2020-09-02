@@ -21,7 +21,7 @@ module API
 
             present :state, contract.state
             present :result, contract.arbitrament_result, with: API::V1::Entities::ArbitramentResult
-            present :arbitraments, contract.arbitraments, with: API::V1::Entities::Arbitrament
+            present :arbitraments, contract.arbitraments.where.not(tx: nil), with: API::V1::Entities::Arbitrament
           end
 
         end

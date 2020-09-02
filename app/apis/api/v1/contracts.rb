@@ -34,8 +34,14 @@ module API
               else
                 contracts = contracts
               end
-            when 'running', 'broken', 'arbitrating', 'finished', 'canceled'
+            when 'running', 'broken', 'canceled'
               contracts = contracts.where(state: params[:state])
+            when 'arbitrating'
+              if user.type == 'Promoter::User'
+                contracts = contracts.where(state: ['arbitrating', 'renter_appealed', 'owner_appealed'])
+              else
+                contracts = contracts.where(state: params[:state])
+              end
             when 'finished'
               contracts = contracts.where(state: ['finished', 'arbitrated'])
             when 'unsigned'

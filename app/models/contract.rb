@@ -229,7 +229,8 @@ class Contract < ApplicationRecord
 
 
     amount = args[1]
-    income = self.incomes.build(user: self.promoter, at: DateTime.current, tx_id: transaction_id, item: 'promoter-fee', amount: amount, currency: currency.name)
+    income = self.incomes.build(user: self.promoter, at: DateTime.current, tx_id: transaction_id, item: 'promoter-fee', 
+                                amount: amount.to_f/(10 ** self.currency.decimals), currency: currency.name)
     income.save!
   end
 
@@ -271,7 +272,8 @@ class Contract < ApplicationRecord
     end
 
     amount = args[1]
-    income = self.incomes.build(user: self.renter, at: DateTime.current, tx_id: transaction_id, item: 'pledge-fee', amount: amount, currency: currency.name)
+    income = self.incomes.build(user: self.renter, at: DateTime.current, tx_id: transaction_id, item: 'pledge-fee',
+                                amount: amount.to_f/(10 ** self.currency.decimals), currency: currency.name)
     income.save!
   end
 
@@ -389,7 +391,8 @@ class Contract < ApplicationRecord
         if self.owner.eth_wallet_address.downcase == addr
           amount = paid_event[1].to_f/(10 ** self.currency.decimals)
           self.incomes.build(user: self.owner, at: DateTime.current, tx_id: transaction_id, 
-                         item: 'arbitrament-fee', amount: amount, 
+                         item: 'arbitrament-fee', 
+                         amount: amount, 
                          currency: self.currency.name).save!
         elsif self.renter.eth_wallet_address.downcase == addr
           amount = paid_event[1].to_f/(10 ** self.currency.decimals)
@@ -535,7 +538,7 @@ class Contract < ApplicationRecord
         user_address = args[0]
         same_address? appeal.user.eth_wallet_address, user_address
       end
-   }
+    }
 
     return if event.nil?
 
@@ -750,7 +753,7 @@ class Contract < ApplicationRecord
 
   def state_desc user
     case self.state
-    when 'running', 'broken', 'arbitrating', 'finished', 'canceled', 'arbitrated'
+    when 'running', 'broken', 'arbitrating', 'finished', 'canceled'
       return self.state
     when 'unsigned', 'renter_signed', 'owner_signed'
       return 'unsigned'
@@ -759,6 +762,8 @@ class Contract < ApplicationRecord
         return 'appealing'
       elsif user.type == 'Owner::User'
         return 'appealed'
+      elsif user.type == 'Promoter::User'
+        return 'arbitrating'
       else
         return 'none'
       end
@@ -767,6 +772,8 @@ class Contract < ApplicationRecord
         return 'appealed'
       elsif user.type == 'Owner::User'
         return 'appealing'
+      elsif user.type == 'Promoter::User'
+        return 'arbitrating'
       else
         return 'none'
       end

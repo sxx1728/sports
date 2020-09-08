@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Admins::SessionsController < Devise::SessionsController
-  include GoogleAuthenticator
+  #include GoogleAuthenticator
   # before_action :configure_sign_in_params, only: [:create]
 
   # GET /resource/sign_in
@@ -12,10 +12,10 @@ class Admins::SessionsController < Devise::SessionsController
   # POST /resource/sign_in
   def create
     super {
-      google_key = params[:google_key]
-      unless verify?(self.resource.google_secret, google_key)
-        sign_out(resource_name)
-      end
+      #google_key = params[:google_key]
+      #unless verify?(self.resource.google_secret, google_key)
+      #  sign_out(resource_name)
+      #end
     }
   end
 

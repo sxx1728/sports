@@ -21,15 +21,6 @@
     <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
   </div>
 
-  <div class="field">
-    <%= f.label :google_secret %><br />
-    <%= f.text_field :google_secret, readonly: true %>
-  </div>
-  <div class="field">
-    <%= image_tag @qrcode_img if @qrcode_img.present? %>
-  </div>
-
-
   <div class="actions">
     <%= f.submit "Sign up" %>
   </div>

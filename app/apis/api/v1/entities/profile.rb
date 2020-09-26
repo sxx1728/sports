@@ -12,6 +12,13 @@ module API
         expose :phone
         expose :desc
         expose :kyc, using: API::V1::Entities::Kyc
+        expose :promote_code do |m,o|
+          if m.type == 'Promoter::User'
+            m.promoter_code.try(:code)
+          else
+            nil
+          end
+        end
       end
     end
   end

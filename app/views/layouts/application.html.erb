@@ -123,13 +123,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
               <li class="nav-item">
                 <a href="<%=kycs_path(func: 'kycs', func_index: '1')%>" class="nav-link <%= "active" if 'kycs' == session['func'] and '1' == session['func_index'] %>">
                   <i class="fas fa-list nav-icon"></i>
-                  <p>待审核订单</p>
+                  <p>待审核认证</p>
                 </a>
               </li>
               <li class="nav-item">
                 <a href="<%=kycs_path(func: 'kycs', func_index: '2')%>" class="nav-link <%= "active" if 'kycs' == session['func'] and '2' == session['func_index'] %>">
                   <i class="fas fa-list nav-icon"></i>
-                  <p>全部审核订单</p>
+                  <p>全部审核认证</p>
                 </a>
               </li>
            </ul>
@@ -139,7 +139,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
             <a href="#" class="nav-link <%= "active" if 'promoter' == session['func'] %>">
               <i class="nav-icon fas fa-coins"></i>
               <p>
-                推广人管理
+                用户管理
                 <i class="right fas fa-angle-left"></i>
               </p>
             </a>
@@ -147,11 +147,30 @@ scratch. This page gets rid of all links and provides the needed markup only.
               <li class="nav-item">
                 <a href="<%=users_path(func: 'promoter', func_index: '1')%>" class="nav-link <%= "active" if 'promoter' == session['func'] and '1' == session['func_index'] %>">
                   <i class="fas fa-list nav-icon"></i>
-                  <p>推广人列表</p>
+                  <p>用户列表</p>
                 </a>
               </li>
            </ul>
           </li>
+
+          <li class="nav-item has-treeview <%= "menu-open" if session['func'] == 'contract' %>">
+            <a href="#" class="nav-link <%= "active" if 'contract' == session['func'] %>">
+              <i class="nav-icon fas fa-coins"></i>
+              <p>
+                合同管理
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="<%=contracts_path(func: 'contracts', func_index: '1')%>" class="nav-link <%= "active" if 'contract' == session['func'] and '1' == session['func_index'] %>">
+                  <i class="fas fa-list nav-icon"></i>
+                  <p>合同列表</p>
+                </a>
+              </li>
+           </ul>
+          </li>
+
 
 
           <% if current_admin.has_role? 'admin' %>

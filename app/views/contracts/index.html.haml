@@ -1,0 +1,38 @@
+%section.content-header
+  .container-fluid
+    .row.mb-2
+      .col-sm-6
+        %h1 合同列表
+      .col-sm-6 
+        %ol.breadcrumb.float-sm-right
+          %li.breadcrumb-item 合同管理
+          %li.breadcrumb-item.active 列表
+
+%section.content
+  .card
+    .p-0
+      %table.table.table-bordered
+        %tbody
+          %tr
+            %th ID
+            %th 房东
+            %th 租客
+            %th 中介
+            %th 状态
+          - @contracts.each do |contract|
+            %tr
+              %td 
+                = link_to(contract.id, contract_path(contract) )
+              %td
+                = contract.owner_id
+              %td
+                = contract.renter_id
+              %td 
+                = contract.promoter_id
+              %td 
+                = contract.state
+
+    .card-footer.clearfix
+      %ul.pagination.pagination-sm.m-0.float-right
+        = will_paginate @contracts, :container => false
+

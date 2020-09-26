@@ -30,6 +30,8 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :contracts
+
   namespace :api do
     mount API::V1::Base => '/'
   end

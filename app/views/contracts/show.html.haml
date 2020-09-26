@@ -1,0 +1,76 @@
+%section.content-header
+  .container-fluid
+    .row.mb-2
+      .col-sm-6
+        %h1 合同详情
+      .col-sm-6 
+        %ol.breadcrumb.float-sm-right
+          %li.breadcrumb-item 合同管理
+          %li.breadcrumb-item.active 详情
+
+%section.content
+  .card
+    .card-body
+      %form.form-horizontal
+        .form-group.row
+          %labal.col-sm-2.col-form-label
+            ID
+          .col-sm-10
+            = text_field_tag(:id, @contract.id, class: 'form-control', "readonly": true)
+        .form-group.row
+          %labal.col-sm-2.col-form-label
+            房东ID
+          .col-sm-10
+            = text_field_tag(:owner_id, @contract.owner_id, class: 'form-control', "readonly": true)
+        .form-group.row
+          %labal.col-sm-2.col-form-label
+            租客ID
+          .col-sm-10
+            = text_field_tag(:renter_id, @contract.renter_id, class: 'form-control', "readonly": true)
+        .form-group.row
+          %labal.col-sm-2.col-form-label
+            中介ID
+          .col-sm-10
+            = text_field_tag(:promoter_id, @contract.promoter_id, class: 'form-control', "readonly": true)
+        .form-group.row
+          %labal.col-sm-2.col-form-label
+            状态码
+          .col-sm-10
+            = text_field_tag(:state, @contract.state, class: 'form-control', "readonly": true)
+        .form-group.row
+          %labal.col-sm-2.col-form-label
+            房屋地址
+          .col-sm-10
+            = text_field_tag(:room_address, @contract.room_address, class: 'form-control', "readonly": true)
+        .form-group.row
+          %labal.col-sm-2.col-form-label
+            房屋街道
+          .col-sm-10
+            = text_field_tag(:room_district, @contract.room_district, class: 'form-control', "readonly": true)
+
+        .form-group.row
+          %labal.col-sm-2.col-form-label
+            房屋门牌
+          .col-sm-10
+            = text_field_tag(:room_no, @contract.room_no, class: 'form-control', "readonly": true)
+
+        .form-group.row
+          %labal.col-sm-2.col-form-label
+            房屋所有人
+          .col-sm-10
+            = text_field_tag(:room_certificate_owner, @contract.room_certificate_owner, class: 'form-control', "readonly": true)
+
+        .form-group.row
+          %labal.col-sm-2.col-form-label
+            房屋用途
+          .col-sm-10
+            = text_field_tag(:room_usage, @contract.room_usage, class: 'form-control', "readonly": true)
+
+
+
+
+
+
+
+
+

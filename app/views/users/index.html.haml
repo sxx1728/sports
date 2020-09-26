@@ -22,20 +22,23 @@
           - @users.each do |user|
             %tr
               %td 
-                = user.id
+                = user.desc
               %td
                 = user.nick_name
               %td
-                = user.promoter_code.try(:code)
+                = user.try(:promoter_code).try(:code)
               %td 
-                = brac_boolean(user.promoter_code.try(:enabled))
+                - if user.type == 'Promoter::User'
+                  = brac_boolean(user.promoter_code.try(:enabled))
+
               %td 
-                - if user.promoter_code.nil?
-                  = link_to('生成推广码', gen_code_user_path(user), method: :patch)
-                - if user.promoter_code.present? and user.promoter_code.enabled
-                  = link_to('禁止推广', disable_code_user_path(user), method: :patch)
-                - else
-                  = link_to('开启推广', enable_code_user_path(user), method: :patch)
+                - if user.type == 'Promoter::User'
+                  - if user.promoter_code.nil?
+                    = link_to('生成推广码', gen_code_user_path(user), method: :patch)
+                  - if user.promoter_code.present? and user.promoter_code.enabled
+                    = link_to('禁止推广', disable_code_user_path(user), method: :patch)
+                  - else
+                    = link_to('开启推广', enable_code_user_path(user), method: :patch)
 
     .card-footer.clearfix
       %ul.pagination.pagination-sm.m-0.float-right

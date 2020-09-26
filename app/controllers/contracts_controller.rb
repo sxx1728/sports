@@ -24,45 +24,25 @@
 #  approved               :boolean          default(FALSE), not null
 #
 
-class UsersController < ApplicationController
+class ContractsController < ApplicationController
   before_action :authorize_ability
 
   def authorize_ability
-    authorize! :manage, User
+    authorize! :manage, Contract
   end
 
 
   def index
     session['func'] = params[:func]
     session['func_index'] = params[:func_index]
-    @users = User.all.paginate page: params[:page], per_page: 10
+    @contracts = Contract.all.paginate page: params[:page], per_page: 10
   end
 
-  def enable_code
-		user = Promoter::User.find(params[:id])
-    user.promoter_code.update!(enabled: true)
-    redirect_to users_path, notice: '使能成功！'
-	end
-
-  def disable_code
-		user = Promoter::User.find(params[:id])
-    user.promoter_code.update!(enabled: false)
-    redirect_to users_path, notice: '关闭成功！'
-	end
-
-  def gen_code
-		user = Promoter::User.find(params[:id])
-    code = 100000 + rand(900000)
-    while PromoterCode.exists?(code: code) do
-      code = 100000 + rand(900000)
-    end
-
-    user.build_promoter_code(code: code, enabled: true).save!
-    redirect_to users_path, notice: '生成成功！'
-	end
-
-
-
+  def show
+    session['func'] = params[:func]
+    session['func_index'] = params[:func_index]
+    @contract = Contract.find(params[:id])
+  end
 
 
 end

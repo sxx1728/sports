@@ -11,11 +11,13 @@ class Ability
       can :manage, ChainlyConfig
       can :manage, User
       can :manage, Kyc
+      can :manage, Contract
     elsif user.has_role? 'operator'
       can :manage, Admin
       can :manage, ChainlyConfig
       can :manage, User
       can :manage, Kyc
+      can :manage, Contract
  
     end
 

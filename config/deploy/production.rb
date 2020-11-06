@@ -6,10 +6,11 @@
 # server "example.com", user: "deploy", roles: %w{app db web}, my_property: :my_value
 # server "example.com", user: "deploy", roles: %w{app web}, other_property: :other_value
 #server "172.18.12.36", user: "ubuntu", roles: %w{app db web}
-server "172.16.21.190", user: "root", roles: %w{app db web}
+server "18.162.230.88", user: "ubuntu", roles: %w{app db web}
 
 set :application, "rent"
-set :deploy_to, "/root/rent"
+set :deploy_to, "/home/ubuntu/rent"
+set :repo_url, "git@github.com:sxx1728/rent.git"
 set :branch,        :master
 
 set :puma_threads,    [4, 16]
@@ -51,15 +52,39 @@ task :webpacker_precompile do
     end
   end
 
+  on roles(:app), in: :parallel do |server|
+    run_locally do
+      execute :rsync,
+        "-a --delete ./public/packs/ ubuntu@#{server.hostname}:#{shared_path}/public/packs/"
+    end
+  end
+
+end
+
+task :asset_pipeline_precompile do
+  run_locally do
+    with rails_env: :production do
+      execute :rm, "-rf public/assets"
+      execute :rails, "assets:precompile"
+    end
+  end
+
+  on roles(:app), in: :parallel do |server|
+    run_locally do
+      execute :rsync,
+        "-a --delete ./public/assets/ ubuntu@#{server.hostname}:#{shared_path}/public/assets/"
+    end
+  end
+
 end
 
 namespace :deploy do
   after  :deploy, :webpacker_precompile
+  after  :deploy, :asset_pipeline_precompile
   after  :finishing,    :cleanup
   after  :finishing,    :restart
 
 end
-
 
 
 # role-based syntax

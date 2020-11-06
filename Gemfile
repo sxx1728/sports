@@ -43,7 +43,7 @@ gem 'base58'
 gem 'will_paginate', "~> 3.1.7"
 gem 'will_paginate-bootstrap', "~> 1.0.2"
 
-gem 'eth', "0.4.10"
+gem 'eth', "0.4.12"
 gem 'ethereum.rb'
 
 gem 'rufus-scheduler'
